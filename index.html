@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d4f0f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>拾错帖 · 错题复盘</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg1:#e6f7f6; --bg2:#e1edfb;
+  --cyan:#3aa5b3; --cyan-d:#237d8a; --cyan-l:#c9ecee;
+  --blue:#4a7fc9; --blue-d:#2f5f9f; --blue-l:#dbe8fa;
+  --lilac:#e9e4f7;
+  --ink:#27384a; --muted:#6a7e92;
+  --burg:#800020; --burg-m:#a3324a; --burg-l:#f7e4e8;
+  --card:rgba(255,255,255,.74); --line:rgba(74,127,201,.18);
+  --radius:18px;
+  --mid:#f5fbff;
+  --g1:rgba(58,165,179,.18); --g2:rgba(74,127,201,.16); --g3:rgba(160,140,220,.16); --g4:rgba(246,190,206,.2);
+  --bar:rgba(240,250,252,.72); --nav:rgba(245,252,255,.86);
+}
+/* —— 主题二：枫红 · 清透 —— */
+html[data-theme="maple"]{
+  --bg1:#fff6f1; --bg2:#fdeee8; --lilac:#eef4f8; --mid:#fffbf8;
+  --cyan:#d65f3f; --cyan-d:#a8432a; --cyan-l:#fbe2d6;
+  --blue:#cf8a3c; --blue-d:#8c4b2e; --blue-l:#f8ebdb;
+  --line:rgba(200,110,70,.2); --muted:#8a7468; --ink:#3b2c28;
+  --g1:rgba(240,120,80,.14); --g2:rgba(255,196,130,.18); --g3:rgba(150,195,225,.14); --g4:rgba(255,160,140,.14);
+  --bar:rgba(255,248,244,.74); --nav:rgba(255,250,247,.88);
+}
+/* —— 主题三：竹青 —— */
+html[data-theme="bamboo"]{
+  --bg1:#e1f3ef; --bg2:#d9e9f6; --lilac:#e3eef7; --mid:#f1faf8;
+  --cyan:#2a978c; --cyan-d:#1b6c66; --cyan-l:#cbede8;
+  --blue:#3b7fb3; --blue-d:#255a85; --blue-l:#d6e7f5;
+  --line:rgba(42,130,140,.2);
+  --g1:rgba(42,151,140,.2); --g2:rgba(59,127,179,.18); --g3:rgba(120,190,200,.16); --g4:rgba(170,215,200,.18);
+  --bar:rgba(236,248,246,.74); --nav:rgba(240,250,249,.88);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  color:var(--ink);min-height:100vh;line-height:1.65;font-size:15px;
+  background:linear-gradient(160deg,var(--bg1) 0%,var(--mid) 45%,var(--bg2) 75%,var(--lilac) 100%) fixed;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom));
+  transition:background .6s;
+}
+/* 水彩晕染背景 */
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+   radial-gradient(40vmax 30vmax at 8% 12%,var(--g1),transparent 70%),
+   radial-gradient(35vmax 28vmax at 92% 22%,var(--g2),transparent 70%),
+   radial-gradient(30vmax 26vmax at 70% 95%,var(--g3),transparent 70%),
+   radial-gradient(26vmax 20vmax at 15% 85%,var(--g4),transparent 70%);}
+#bgLayer{position:fixed;inset:0;z-index:-1;pointer-events:none;background-size:cover;background-position:center;opacity:0;transition:opacity .4s}
+#bgLayer.on{opacity:.22}
+/* ===== 动态背景 ===== */
+.fx{pointer-events:none;z-index:0}
+/* 通用：飘落物（樱花瓣 / 竹叶） */
+.fall{position:fixed;top:0;animation:fallDown linear infinite;will-change:transform}
+.fall svg{display:block;animation:fallSway ease-in-out infinite alternate}
+@keyframes fallDown{from{transform:translateY(-12vh)}to{transform:translateY(112vh)}}
+@keyframes fallSway{from{transform:translateX(-30px) rotate(-40deg) rotateY(0)}to{transform:translateX(40px) rotate(80deg) rotateY(160deg)}}
+
+/* 主题二：大枫叶若隐若现 */
+.bigleaf{position:fixed;opacity:0;will-change:transform,opacity;
+  animation:ghost var(--d,18s) ease-in-out infinite;animation-delay:var(--dl,0s)}
+.bigleaf svg{display:block;width:100%;height:100%}
+@keyframes ghost{
+  0%{opacity:0;transform:translate(0,0) rotate(var(--r0)) scale(.9)}
+  40%,60%{opacity:var(--o)}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--r1)) scale(1.06)}}
+.sun{position:fixed;top:-18vmax;right:-14vmax;width:60vmax;height:60vmax;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,236,214,.85) 0,rgba(255,214,186,.35) 35%,transparent 68%);animation:breathe 12s ease-in-out infinite alternate}
+@keyframes breathe{from{opacity:.6;transform:scale(.95)}to{opacity:1;transform:scale(1.05)}}
+.bokeh{position:fixed;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95) 0,rgba(255,226,200,.45) 40%,transparent 70%);
+  opacity:0;animation:twinkle ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:0;transform:translateY(0) scale(.6)}50%{opacity:.85;transform:translateY(-30px) scale(1)}}
+
+/* 主题三：竹影 */
+.fx-bamboo{position:fixed;bottom:-3vh;height:106vh;width:min(42vw,380px);color:#1f6a78;opacity:.15;filter:blur(1.3px);
+  transform-origin:50% 100%;animation:bambooSway 9s ease-in-out infinite alternate;will-change:transform}
+.fx-bamboo.l{left:-40px}
+.fx-bamboo.r{right:-40px;animation-duration:11s;animation-delay:-4s}
+.fx-bamboo.r svg{transform:scaleX(-1)}
+.fx-bamboo svg{width:100%;height:100%;display:block}
+.fx-bamboo .lv{transform-box:fill-box;transform-origin:0 50%;animation:leafWave 3.6s ease-in-out infinite alternate}
+@keyframes bambooSway{from{transform:rotate(-1.3deg) translateX(-6px)}to{transform:rotate(1.5deg) translateX(8px)}}
+@keyframes leafWave{from{transform:rotate(-6deg)}to{transform:rotate(7deg)}}
+.rays{position:fixed;inset:-10vh -10vw;background:repeating-linear-gradient(115deg,transparent 0 9vw,rgba(255,255,255,.35) 9vw 11vw,transparent 11vw 22vw);
+  -webkit-mask-image:linear-gradient(200deg,#000,transparent 65%);mask-image:linear-gradient(200deg,#000,transparent 65%);animation:raysMove 20s ease-in-out infinite alternate}
+@keyframes raysMove{from{transform:translateX(-3vw);opacity:.5}to{transform:translateX(3vw);opacity:1}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+html.still .fx,html.still .fx *{animation:none !important}
+html.still .bigleaf{opacity:var(--o)}
+@media (prefers-reduced-motion:reduce){.fx,.fx *{animation:none !important}.bigleaf{opacity:var(--o)}}
+
+/* 主题选择卡片 */
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.th-card{border:2px solid transparent;border-radius:14px;overflow:hidden;cursor:pointer;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.06);transition:.2s;padding:0;font:inherit;color:inherit;text-align:center}
+.th-card .pv{height:70px;position:relative;overflow:hidden}
+.th-card span{display:block;padding:6px 0;font-size:13px}
+.th-card.on{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-l)}
+.pv.sakura{background:linear-gradient(150deg,#e6f7f6,#f5fbff 50%,#e9e4f7)}
+.pv.maple{background:linear-gradient(150deg,#fff6f1,#fffbf8 50%,#eef4f8)}
+.pv.bamboo{background:linear-gradient(150deg,#e1f3ef,#f1faf8 50%,#d9e9f6)}
+.pv svg{position:absolute}
+.hbtn{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;color:var(--cyan-d)}
+.hbtn svg{width:18px;height:18px}
+
+header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background:var(--bar);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+header.top .logo{width:44px;height:44px;flex:none;padding:0;border:none;cursor:pointer;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.95) 40%,var(--cyan-l) 100%);box-shadow:0 3px 10px rgba(60,110,160,.15),inset 0 0 0 1.5px rgba(255,255,255,.9);
+  display:flex;align-items:center;justify-content:center}
+header.top .logo .mascot{width:34px;height:34px;animation:none}
+header.top .logo.wiggle .mascot{animation:wiggle .6s ease}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-14deg) scale(1.1)}60%{transform:rotate(10deg) scale(1.05)}}
+/* Fluent Emoji 吉祥物 */
+.mascot{display:inline-block;width:96px;height:96px;object-fit:contain;-webkit-user-drag:none;user-select:none;
+  animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 6px 8px rgba(60,90,130,.15))}
+span.mascot{line-height:1;font-size:80px;text-align:center}
+header.top .logo span.mascot{font-size:28px}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+.empty .say{display:inline-block;margin-top:6px;padding:6px 14px;border-radius:14px;background:rgba(255,255,255,.75);border:1px solid var(--line);color:var(--muted);font-size:13.5px}
+.credit{font-size:11.5px;color:var(--muted);text-align:center;margin:6px 0 0}
+.credit a{color:inherit}
+header.top h1{margin:0;font-size:19px;letter-spacing:2px;font-weight:700}
+header.top h1 small{display:block;font-size:10px;letter-spacing:3px;color:var(--muted);font-weight:400}
+header.top .vert{margin-left:auto;writing-mode:vertical-rl;font-size:8.5px;line-height:1;color:var(--blue);letter-spacing:1px;opacity:.7;white-space:nowrap}
+
+main{max-width:1080px;margin:0 auto;padding:14px 14px 30px;position:relative;z-index:1}
+
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  background:var(--nav);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+nav.bottom::before{content:"";position:absolute;left:8%;right:8%;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,164,106,.7),transparent)}
+nav.bottom a{position:relative;flex:1;text-align:center;text-decoration:none;color:#7b8ba3;font-size:11px;letter-spacing:1px;
+  padding:3px 0 1px;outline:none;-webkit-user-select:none;user-select:none;transition:color .25s}
+nav.bottom .ico{position:relative;display:flex;align-items:center;justify-content:center;width:38px;height:34px;margin:0 auto 1px}
+nav.bottom .ico svg{position:relative;z-index:1;width:23px;height:23px;transition:transform .3s,filter .3s}
+/* 选中时：菱形描金框 + 柔光 */
+nav.bottom .ico::before{content:"";position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:5px;
+  border:1px solid rgba(201,164,106,.9);background:radial-gradient(circle,rgba(255,246,226,.95) 20%,rgba(222,240,244,.6) 100%);
+  box-shadow:0 0 12px rgba(201,164,106,.45),inset 0 0 0 2.5px rgba(255,255,255,.7);
+  transform:rotate(45deg) scale(.4);opacity:0;transition:transform .35s cubic-bezier(.3,1.6,.5,1),opacity .25s}
+nav.bottom .ico::after{content:"";position:absolute;left:50%;top:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;
+  border:1px dashed rgba(201,164,106,.55);opacity:0;transform:scale(.6);transition:.35s}
+nav.bottom a.on{color:var(--cyan-d);font-weight:600}
+nav.bottom a.on .ico{color:#9a7038}
+nav.bottom a.on .ico svg{transform:translateY(-1px);filter:drop-shadow(0 1px 2px rgba(154,112,56,.35))}
+nav.bottom a.on .ico::before{opacity:1;transform:rotate(45deg) scale(1)}
+nav.bottom a.on .ico::after{opacity:1;transform:scale(1);animation:spinSlow 14s linear infinite}
+nav.bottom a.on::after{content:"";position:absolute;top:-4px;left:50%;width:6px;height:6px;margin-left:-3px;background:#c9a46a;transform:rotate(45deg)}
+nav.bottom a:focus-visible .ico::before{opacity:.6;transform:rotate(45deg) scale(.9)}
+nav.bottom a:active .ico svg{transform:scale(.9)}
+
+.card{background:var(--card);border:1px solid rgba(255,255,255,.9);border-radius:var(--radius);
+  box-shadow:0 6px 24px rgba(60,110,160,.10);padding:16px;margin-bottom:14px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.card h3{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:6px;color:var(--blue-d)}
+.card h3 .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan)}
+.muted{color:var(--muted);font-size:13px}
+
+input,textarea,select{width:100%;font:inherit;color:var(--ink);background:rgba(255,255,255,.85);
+  border:1px solid var(--line);border-radius:12px;padding:10px 12px;outline:none;transition:border .2s,box-shadow .2s}
+input:focus,textarea:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(58,165,179,.15)}
+textarea{min-height:90px;resize:vertical}
+label.f{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+label.f b{color:var(--burg)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;cursor:pointer;font:inherit;font-size:14px;
+  padding:10px 16px;border-radius:999px;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#fff;
+  box-shadow:0 4px 14px rgba(58,140,190,.3);transition:transform .1s,opacity .2s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5}
+.btn.ghost{background:rgba(255,255,255,.8);color:var(--blue-d);border:1px solid var(--line);box-shadow:none}
+.btn.burg{background:linear-gradient(135deg,var(--burg-m),var(--burg))}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.btn.block{width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row > *{flex:none}
+.grow{flex:1 !important}
+
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font-size:12.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.7);color:var(--muted);cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+.chip.burg.on{background:var(--burg);border-color:var(--burg)}
+
+.tag{display:inline-block;font-size:12px;padding:2px 10px;border-radius:999px;background:var(--cyan-l);color:var(--cyan-d);margin:0 6px 6px 0}
+.tag.blue{background:var(--blue-l);color:var(--blue-d)}
+.tag.burg{background:var(--burg-l);color:var(--burg);font-weight:600}
+.tag.due{background:#fff3d6;color:#9a6a00}
+
+/* 错题列表 */
+.item{display:block;text-decoration:none;color:inherit;position:relative;overflow:hidden;
+  --rc:#8fa5bb;--rc2:#c3d1df;--rl:#edf2f7;
+  background:linear-gradient(100deg,color-mix(in srgb,var(--rl) 85%,transparent) 0,transparent 42%),var(--card)}
+.item::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:5px;border-radius:0 5px 5px 0;
+  background:linear-gradient(180deg,var(--rc),var(--rc2));box-shadow:2px 0 8px color-mix(in srgb,var(--rc) 35%,transparent)}
+.item.ok{--rc:var(--cyan);--rc2:var(--blue);--rl:var(--cyan-l)}
+.tag.rc{background:var(--rl);color:var(--rc);font-weight:600;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--rc) 22%,transparent)}
+.chip.rc{color:var(--rc);background:var(--rl);border-color:color-mix(in srgb,var(--rc) 25%,transparent)}
+.chip.rc.on{background:linear-gradient(135deg,var(--rc),var(--rc2));color:#fff;border-color:var(--rc)}
+.item .t{font-weight:600;font-size:15px;margin-bottom:4px;padding-left:6px}
+.item .q{color:var(--muted);font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding-left:6px}
+.item .w{margin-top:8px;font-size:13px;color:var(--burg);padding-left:6px}
+.item .meta{margin-top:8px;padding-left:6px}
+.item img.th{float:right;width:64px;height:64px;object-fit:cover;border-radius:10px;margin-left:10px}
+
+/* 统计 */
+.bars .b{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:6px 0}
+.bars .b span:first-child{width:86px;flex:none;color:var(--muted)}
+.bars .b .track{flex:1;height:10px;border-radius:6px;background:rgba(74,127,201,.1);overflow:hidden}
+.bars .b .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--rc2,var(--burg-m)),var(--rc,var(--burg)))}
+.bars .b em{width:26px;text-align:right;font-style:normal;color:var(--rc,var(--burg));font-weight:600}
+.bars .b span:first-child{color:var(--rc,var(--muted))}
+
+/* 详情 */
+.detail-grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:860px){.detail-grid{grid-template-columns:1.05fr 1fr}.detail-grid .card{margin-bottom:0}}
+.qtext{font-size:15.5px;white-space:normal;word-break:break-word}
+.qimg{max-width:100%;border-radius:12px;margin:8px 0;border:1px solid var(--line)}
+.wrong{background:var(--burg-l);border-left:4px solid var(--burg);border-radius:10px;padding:10px 12px;margin-top:10px;color:var(--burg)}
+.wrong .lb,.right .lb{font-size:12px;font-weight:700;letter-spacing:1px;display:block;margin-bottom:2px}
+.right{background:rgba(58,165,179,.1);border-left:4px solid var(--cyan);border-radius:10px;padding:10px 12px;margin-top:10px;color:var(--cyan-d)}
+.root{border:1.5px dashed var(--rc2,var(--burg-m));background:color-mix(in srgb,var(--rl,#f7e4e8) 70%,transparent);border-radius:14px;padding:12px}
+.root .cat{font-size:18px;font-weight:800;color:var(--rc,var(--burg));letter-spacing:2px}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:8px 0 8px 36px;border-bottom:1px dashed var(--line)}
+ol.steps li:last-child{border-bottom:none}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:24px;height:24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700}
+ul.pts{margin:0;padding-left:20px}
+ul.pts li{margin:4px 0}
+ul.pts.trap li::marker{content:"⚠ ";color:var(--burg)}
+ul.pts.score li::marker{content:"✓ ";color:var(--cyan-d)}
+ul.pts.ext li::marker{content:"➜ ";color:var(--blue)}
+.essence{background:linear-gradient(135deg,rgba(201,236,238,.6),rgba(219,232,250,.6));border-radius:14px;padding:12px 14px;font-size:15px}
+
+.tblwrap{overflow-x:auto;border-radius:12px;border:1px solid var(--line)}
+table.cmp{border-collapse:collapse;width:100%;min-width:420px;font-size:13.5px;background:rgba(255,255,255,.7)}
+table.cmp th{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#fff;padding:8px 10px;text-align:left;font-weight:600}
+table.cmp td{padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
+table.cmp td:first-child{font-weight:600;color:var(--blue-d);background:rgba(219,232,250,.4);white-space:nowrap}
+
+/* 符纸式警示语 */
+.ofuda-wrap{display:flex;justify-content:center}
+.ofuda{position:relative;background:linear-gradient(#fffaf0,#fff4e2);border:1.5px solid #c9a46a;padding:18px 14px 16px;
+  box-shadow:0 6px 18px rgba(128,0,32,.15);border-radius:4px;max-width:100%}
+.ofuda::before,.ofuda::after{content:"";position:absolute;left:6px;right:6px;height:2px;background:var(--burg)}
+.ofuda::before{top:7px}.ofuda::after{bottom:7px}
+.ofuda .txt{color:var(--burg);font-size:18px;font-weight:700;letter-spacing:3px;text-align:center;font-family:"STKaiti","KaiTi","Kaiti SC",serif}
+.ofuda .seal{position:absolute;right:-8px;bottom:-8px;width:26px;height:26px;border-radius:5px;background:var(--burg);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;transform:rotate(-8deg)}
+@media (min-width:860px){
+  .ofuda.v{writing-mode:vertical-rl;padding:16px 18px;max-height:440px}
+  .ofuda.v::before,.ofuda.v::after{top:6px;bottom:6px;left:auto;right:auto;width:2px;height:auto}
+  .ofuda.v::before{left:7px}.ofuda.v::after{right:7px}
+}
+.side-note{display:flex;gap:14px;align-items:flex-start}
+.side-note .qcol{flex:1;min-width:0}
+@media (max-width:859px){.side-note{flex-direction:column}.side-note .ofuda-wrap{width:100%}}
+
+.fu{border-top:1px dashed var(--line);padding:10px 0}
+.fu .uq{font-weight:600;color:var(--blue-d)}
+.fu .ua{margin-top:4px;font-size:14px}
+
+/* 复习 */
+.rv-card{min-height:240px}
+.rv-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.rv-actions .btn{padding:12px 6px}
+.warn-list .wl{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line);text-decoration:none;color:inherit}
+.warn-list .wl b{color:var(--burg);font-family:"STKaiti","KaiTi","Kaiti SC",serif;font-size:16px;letter-spacing:1px}
+
+.empty{text-align:center;padding:40px 10px;color:var(--muted)}
+.empty p{margin:10px 0 14px}
+
+#toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);
+  background:rgba(39,56,74,.92);color:#fff;padding:9px 18px;border-radius:999px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:88vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#loading{position:fixed;inset:0;z-index:90;background:rgba(235,248,250,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:var(--blue-d)}
+#loading.on{display:flex}
+#loading svg{width:90px;height:90px;animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--blue-d);text-decoration:none;font-size:14px;margin-bottom:10px}
+.hr{height:1px;background:var(--line);margin:14px 0}
+
+/* 错因对照 */
+.sub-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--cyan-d);margin:14px 0 8px}
+.sub-h:first-child{margin-top:0}
+.sub-h span{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;
+  background:linear-gradient(135deg,var(--cyan),var(--blue))}
+.sub-h.burg{color:var(--burg)}
+.sub-h.burg span{background:linear-gradient(135deg,var(--burg-m),var(--burg))}
+.wpath{font-size:14px;color:var(--burg);background:var(--burg-l);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-family:"STKaiti","KaiTi","Kaiti SC",serif;font-size:15px}
+.wvr{border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.65);margin-bottom:10px;overflow:hidden}
+.wvr .mine{padding:9px 12px;background:linear-gradient(90deg,rgba(247,228,232,.95),rgba(247,228,232,.4));color:#5a1a28;border-left:4px solid var(--burg)}
+.wvr .fix{padding:9px 12px;background:linear-gradient(90deg,rgba(58,165,179,.16),rgba(58,165,179,.05));color:var(--ink);border-left:4px solid var(--cyan)}
+.wvr .lb{display:block;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:2px}
+.wvr .mine .lb{color:var(--burg)}
+.wvr .fix .lb{color:var(--cyan-d)}
+.wvr .why{position:relative;padding:8px 12px 8px 12px;font-size:13.5px;color:#7a4a12;background:#fff7e8;border-left:4px solid #e6a23c}
+.wvr .why span{display:inline-block;margin-right:6px;padding:0 8px;border-radius:999px;background:#e6a23c;color:#fff;font-size:11.5px;font-weight:700}.wvr-tip{background:rgba(255,247,232,.8);border-radius:10px;padding:8px 12px}
+details.ctx{margin-top:8px;font-size:13.5px}
+details.ctx summary{cursor:pointer;color:var(--blue-d)}
+details.ctx > div{margin-top:6px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.6);border:1px dashed var(--line);max-height:320px;overflow:auto;color:var(--muted)}
+
+/* 分段切换 */
+.seg{display:flex;gap:4px;padding:4px;margin-bottom:14px;border-radius:999px;background:rgba(255,255,255,.6);border:1px solid var(--line)}
+.seg button{flex:1;border:none;background:none;font:inherit;font-size:14px;padding:8px 0;border-radius:999px;color:var(--muted);cursor:pointer;transition:.2s}
+.seg button.on{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#fff;font-weight:600;box-shadow:0 3px 10px rgba(58,140,190,.25)}
+/* 批量识别结果 */
+.bi{padding:12px 14px}
+.bi.off{opacity:.55}
+.bi-h{gap:8px;cursor:pointer;margin-bottom:6px}
+.bi-h input{width:18px;height:18px;flex:none;accent-color:var(--cyan)}
+.bi .tag{margin-bottom:0}
+.bq{font-size:14px;display:-webkit-box;-webkit-line-clamp:4;line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.bmeta{font-size:13px;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
+.bedit summary{cursor:pointer;color:var(--blue-d);font-size:13px;margin-top:8px}
+.batch-bar{position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));z-index:12;display:flex;gap:10px;padding:10px;border-radius:999px;
+  background:var(--nav);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);box-shadow:0 6px 20px rgba(60,110,160,.15)}
+
+/* 详情：分区折叠 */
+details.fold > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;-webkit-user-select:none;user-select:none}
+details.fold > summary::-webkit-details-marker{display:none}
+details.fold > summary h3{margin:0;flex:1}
+details.fold[open] > summary{margin-bottom:10px}
+.chev{width:22px;height:22px;flex:none;border-radius:50%;background:var(--cyan-l);position:relative;transition:transform .25s}
+.chev::before{content:"";position:absolute;left:7px;top:6px;width:6px;height:6px;border-right:2px solid var(--cyan-d);border-bottom:2px solid var(--cyan-d);transform:rotate(45deg)}
+details.fold[open] .chev{transform:rotate(180deg)}
+details.fold:not([open]){padding-top:12px;padding-bottom:12px}
+.fold-body{animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.card[id^="sec-"],#sec-act{scroll-margin-top:calc(var(--hdr,66px) + 58px)}
+.secnav{position:sticky;top:var(--hdr,66px);z-index:15;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;
+  margin:-14px -14px 12px;padding:8px 14px;background:var(--bar);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.secnav::-webkit-scrollbar{display:none}
+.secnav .back{margin:0 4px 0 0;font-size:22px;line-height:1;padding:0 4px;flex:none}
+.secnav .chip{font:inherit;font-size:12.5px}
+.secnav .tog{color:var(--cyan-d);border-color:var(--cyan);background:var(--cyan-l)}
+.clampbox{position:relative}
+.clampbox.clamped{max-height:260px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 65%,transparent);mask-image:linear-gradient(#000 65%,transparent)}
+.morebtn{display:block;margin:4px auto 0;border:none;background:var(--cyan-l);color:var(--cyan-d);font:inherit;font-size:13px;padding:5px 16px;border-radius:999px;cursor:pointer}
+#toTop{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:25;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);
+  background:var(--nav);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--cyan-d);font-size:18px;cursor:pointer;
+  box-shadow:0 4px 14px rgba(60,110,160,.18);opacity:0;pointer-events:none;transform:translateY(10px);transition:.25s}
+#toTop.on{opacity:1;pointer-events:auto;transform:none}
+.katex{font-size:1.05em}
+</style>
+</head>
+<body>
+<div id="bgLayer"></div>
+
+<header class="top">
+  <button class="logo" id="logo" aria-label="今日小伙伴"></button>
+  <h1>拾错帖<small>MISTAKE · NOTEBOOK</small></h1>
+  <div class="vert">しっぱいちょう</div>
+  <button class="hbtn" id="themeBtn" title="切换主题" aria-label="切换主题"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.3-1.2-1.5-1.2-2.6 0-.9.7-1.5 1.7-1.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/>
+    <circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/></svg></button>
+</header>
+
+<main id="main"></main>
+
+<nav class="bottom">
+  <a href="#list" data-v="list"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 5.2A1.7 1.7 0 0 1 6.7 3.5H18v14H6.7A1.7 1.7 0 0 0 5 19.2z"/><path d="M5 19.2a1.7 1.7 0 0 0 1.7 1.7H18v-3.4"/>
+    <path d="M11.5 7.2l1.9 2.6-1.9 2.6-1.9-2.6z" fill="currentColor" fill-opacity=".25"/><path d="M8.3 14.6h6.4"/></svg></span>错题本</a>
+  <a href="#add" data-v="add"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 3.5c-7 .3-11.6 4.8-12.9 11.9 5.3-.6 10.6-4.3 12.9-11.9z" fill="currentColor" fill-opacity=".18"/>
+    <path d="M4 20.5l9.5-10.5"/><path d="M10.2 12.6l3 .1M12.7 9.6l2.9-.2"/><path d="M3.8 20.8h6"/></svg></span>录入</a>
+  <a href="#review" data-v="review"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19.4 13.2A7.5 7.5 0 1 1 17 6.4"/><path d="M17.8 2.8v4.1h-4.1"/>
+    <path d="M12 8.2l1 2.8 2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1z" fill="currentColor" fill-opacity=".3"/></svg></span>复习</a>
+  <a href="#settings" data-v="settings"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.8l2 3.4 3.9-.9-.9 3.9 3.4 2-3.4 2 .9 3.9-3.9-.9-2 3.4-2-3.4-3.9.9.9-3.9-3.4-2 3.4-2-.9-3.9 3.9.9z"/>
+    <circle cx="12" cy="12" r="3.1" fill="currentColor" fill-opacity=".22"/></svg></span>设置</a>
+</nav>
+
+<button id="toTop" aria-label="回到顶部">↑</button>
+<div id="toast"></div>
+<div id="loading">
+  <svg viewBox="0 0 100 100" aria-hidden="true">
+    <!-- 原创和伞 -->
+    <circle cx="50" cy="50" r="44" fill="#dbe8fa" stroke="#4a7fc9" stroke-width="2"/>
+    <g stroke="#4a7fc9" stroke-width="1.5">
+      <line x1="50" y1="50" x2="50" y2="6"/><line x1="50" y1="50" x2="94" y2="50"/><line x1="50" y1="50" x2="50" y2="94"/><line x1="50" y1="50" x2="6" y2="50"/>
+      <line x1="50" y1="50" x2="81" y2="19"/><line x1="50" y1="50" x2="81" y2="81"/><line x1="50" y1="50" x2="19" y2="81"/><line x1="50" y1="50" x2="19" y2="19"/>
+    </g>
+    <circle cx="50" cy="50" r="30" fill="none" stroke="#3aa5b3" stroke-width="1" stroke-dasharray="3 4"/>
+    <circle cx="50" cy="50" r="7" fill="#800020"/>
+  </svg>
+  <div id="loadingText">正在请老师批阅…</div>
+  <button class="btn ghost sm" id="loadingStop" hidden>停止</button>
+</div>
+
+<script>
+/* ========== 工具 ========== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const txt = s => esc(s).replace(/\n/g, '<br>');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const DAY = 86400000;
+const ROOTS = ['概念混淆','审题漏条件','公式记错','答题范式不对','计算失误','知识盲区','其他'];
+// 每种错误根源一套颜色：[主色, 渐变色, 浅底]
+const ROOT_COLORS = {
+  '概念混淆':   ['#7a5bc7', '#b89df0', '#efe9fc'],
+  '审题漏条件': ['#d0701a', '#f4b65c', '#fdf0de'],
+  '公式记错':   ['#2f74c9', '#7db5f0', '#e2eefc'],
+  '答题范式不对': ['#1d9576', '#6fd0b0', '#dcf4ec'],
+  '计算失误':   ['#cf4577', '#f29bbb', '#fce6ee'],
+  '知识盲区':   ['#800020', '#c4506a', '#f7e4e8'],
+  '其他':       ['#5f7488', '#a9b8c7', '#e9eef3'],
+};
+const rcStyle = c => { const p = ROOT_COLORS[c] || ROOT_COLORS['其他']; return `--rc:${p[0]};--rc2:${p[1]};--rl:${p[2]}`; };
+const rcTag = c => c ? `<span class="tag rc" style="${rcStyle(c)}">${esc(c)}</span>` : '';
+const INTERVALS = [1, 2, 4, 7, 15, 30]; // 天
+function toast(m, ms = 2200){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), ms); }
+function loading(on, text){ $('#loading').classList.toggle('on', on); if (text) $('#loadingText').textContent = text; }
+function math(el){
+  if (window.renderMathInElement) renderMathInElement(el, {delimiters:[
+    {left:'$$',right:'$$',display:true},{left:'\\[',right:'\\]',display:true},
+    {left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}], throwOnError:false});
+}
+const fmtDate = t => { const d = new Date(t); return `${d.getMonth()+1}月${d.getDate()}日`; };
+
+/* ========== 存储（IndexedDB，容量大，图片也能存） ========== */
+const DB = {
+  db: null,
+  open(){ return new Promise((res, rej) => {
+    const r = indexedDB.open('cuoti_fupan', 1);
+    r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('items', {keyPath:'id'}); d.createObjectStore('kv'); };
+    r.onsuccess = () => { this.db = r.result; res(); }; r.onerror = () => rej(r.error);
+  });},
+  tx(store, mode, fn){ return new Promise((res, rej) => {
+    const t = this.db.transaction(store, mode); const s = t.objectStore(store); const r = fn(s);
+    t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error);
+  });},
+  all(){ return this.tx('items', 'readonly', s => s.getAll()); },
+  put(o){ return this.tx('items', 'readwrite', s => s.put(o)); },
+  del(id){ return this.tx('items', 'readwrite', s => s.delete(id)); },
+  getKV(k){ return this.tx('kv', 'readonly', s => s.get(k)); },
+  setKV(k, v){ return this.tx('kv', 'readwrite', s => s.put(v, k)); },
+};
+let ITEMS = [];
+async function saveItem(it){ it.updated = Date.now(); await DB.put(it); const i = ITEMS.findIndex(x => x.id === it.id); if (i >= 0) ITEMS[i] = it; else ITEMS.unshift(it); }
+const getItem = id => ITEMS.find(x => x.id === id);
+
+const SET_KEY = 'cuoti_settings';
+const SETTINGS = Object.assign({apiKey:'', baseUrl:'https://api.deepseek.com', model:'deepseek-chat', vision:false},
+  JSON.parse(localStorage.getItem(SET_KEY) || '{}'));
+delete SETTINGS.fx; delete SETTINGS.petals;
+{ const q = new URLSearchParams(location.search).get('theme'); if (q) SETTINGS.theme = q; }
+if (!['sakura', 'maple', 'bamboo'].includes(SETTINGS.theme)) SETTINGS.theme = 'sakura';
+if (SETTINGS.motion === undefined) SETTINGS.motion = true;
+const saveSettings = () => localStorage.setItem(SET_KEY, JSON.stringify(SETTINGS));
+
+/* ========== 图片压缩 ========== */
+function compressImage(file, max = 1400, q = .82){ return new Promise((res, rej) => {
+  const fr = new FileReader();
+  fr.onload = () => { const img = new Image(); img.onload = () => {
+    let {width:w, height:h} = img; const k = Math.min(1, max / Math.max(w, h)); w = Math.round(w*k); h = Math.round(h*k);
+    const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+    res(c.toDataURL('image/jpeg', q)); }; img.onerror = rej; img.src = fr.result; };
+  fr.onerror = rej; fr.readAsDataURL(file);
+});}
+
+/* ========== OCR（按需加载，DeepSeek 文本模型看不了图，先识别成文字） ========== */
+let tessLoading = null;
+function loadTesseract(){
+  if (window.Tesseract) return Promise.resolve();
+  if (!tessLoading) tessLoading = new Promise((res, rej) => { const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'; s.onload = res; s.onerror = () => rej(new Error('OCR 组件加载失败')); document.head.appendChild(s); });
+  return tessLoading;
+}
+async function ocr(dataUrl){
+  await loadTesseract();
+  const r = await Tesseract.recognize(dataUrl, 'chi_sim+eng', {logger: m => { if (m.status === 'recognizing text') $('#loadingText').textContent = `识别文字中 ${Math.round(m.progress*100)}%`; }});
+  return r.data.text.replace(/(?<=[一-龥]) (?=[一-龥])/g, '').trim();
+}
+
+/* ========== DeepSeek 接口 ========== */
+const SYS_PROMPT = `你是一位经验丰富的学科老师兼错题复盘教练。学生会给你一道做错的题目、TA的错误答案，可能还有正确答案、TA自己的想法，以及之前和AI聊这道题的原文。
+请深度分析，并且只输出一个 json 对象（不要输出 json 以外的任何文字），结构如下：
+{
+ "subject": "学科，如 数学/物理/政治/英语",
+ "qtype": "选择题|填空题|判断题|简答题|论述题|计算题|材料分析题|其他",
+ "title": "12字以内的题目概括",
+ "knowledge_points": ["本题考点1", "考点2"],
+ "error_root": {"category": "概念混淆|审题漏条件|公式记错|答题范式不对|计算失误|知识盲区|其他", "detail": "具体指出错在哪一步、为什么会这样错、背后的思维漏洞"},
+ "my_wrong_path": "用学生第一人称还原TA当时的整体错误思路，1-2句，如“我以为……所以……”",
+ "wrong_vs_right": [{"mine": "我当时在这一步是怎么想/怎么做的（第一人称，尽量还原原话或原式）", "why": "这样为什么不对，漏掉/混淆了什么", "fix": "正确的想法或做法，给出关键式子"}],
+ "correct_steps": ["第1步：……（依据：……）", "第2步：……"],
+ "final_answer": "正确答案",
+ "essence": "本题精华：2-3句话提炼最值得记住的东西",
+ "traps": ["选择题挖坑点：逐个说明干扰项是怎么设坑的；非选择题给空数组"],
+ "scoring_points": ["简答/主观题的得分要点（关键词+踩分句式）；纯客观题给空数组"],
+ "extension_angles": ["论述题可以延伸的角度（理论、现实、历史、对比等）；不适用给空数组"],
+ "comparison": {"title": "易混淆知识点对比", "headers": ["对比维度", "知识点A", "知识点B"], "rows": [["定义", "…", "…"]]},
+ "warning": "一句不超过16字的错题警示语，简短有力、朗朗上口，方便写在错题旁边"
+}
+要求：
+1. 数学/物理公式用 LaTeX，行内用 $...$ 包裹（json 中反斜杠要转义）。
+2. 推导一步一步写清楚，每一步说明依据，不能跳步。
+3. 学生没给正确答案时，你自己严谨求解；学生给的答案可能有误，以你的严谨判断为准并说明。
+4. 对比表至少3行，挑与本题最容易混淆的2-3个同类知识点。
+5. error_root.category 只能从给定选项中选一个最主要的，“其他”只在确实无法归类时才用。
+6. wrong_vs_right 是重点：给 2-4 组，按解题顺序，逐个对应到学生出错或犹豫的具体环节（例如“我纠结该用排列A还是组合C”“我把分母写成了…”），讲清“我怎么想的 → 错在哪 → 应该怎么想”。
+7. 学生的错误思路要从【我的答案】【我的想法】【之前的聊天】里找，聊天里往往已经暴露了学生的困惑和AI的纠正，要充分利用、尽量还原原话。
+   如果确实找不到学生的作答，就推断最可能的典型错误思路，并在 mine 开头标注“（推断）”。严禁只写“学生未填写答案”这类空话，error_root.detail 也必须具体。`;
+
+function buildUserMsg(it){
+  return [
+    it.subject && `【学科】${it.subject}`,
+    `【题目】\n${it.question || '（见图片）'}`,
+    `【我的答案】\n${it.myAnswer || '（未填写）'}`,
+    it.correctAnswer && `【正确答案】\n${it.correctAnswer}`,
+    it.myNote && `【我自己的想法/当时怎么想的】\n${it.myNote}`,
+    it.chatContext && `【之前和AI聊这道题的原文（含我的困惑和AI的纠正）】\n${it.chatContext}`,
+  ].filter(Boolean).join('\n\n');
+}
+
+async function callAI(messages, wantJson, opts = {}){
+  if (!SETTINGS.apiKey) throw new Error('请先在「设置」里填写 DeepSeek API Key');
+  const base = SETTINGS.baseUrl.replace(/\/+$/, '');
+  const model = opts.model || SETTINGS.model;
+  const body = {model, messages, temperature: opts.temperature ?? .3, max_tokens: opts.maxTokens || 4096, stream: false};
+  if (wantJson && !/reasoner|r1/i.test(model)) body.response_format = {type: 'json_object'};
+  let r;
+  try {
+    r = await fetch(base + '/chat/completions', {method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SETTINGS.apiKey}, body: JSON.stringify(body)});
+  } catch (e) { throw new Error('网络请求失败（检查网络 / 接口地址 / 跨域）：' + e.message); }
+  if (!r.ok) {
+    let m = r.status + ''; try { const j = await r.json(); m += ' ' + (j.error?.message || JSON.stringify(j)); } catch {}
+    if (r.status === 401) m = 'API Key 无效（401）'; if (r.status === 402) m = '账户余额不足（402）';
+    throw new Error('接口报错：' + m);
+  }
+  const j = await r.json();
+  return j.choices?.[0]?.message?.content || '';
+}
+
+function parseJSON(s){
+  try { return JSON.parse(s); } catch {}
+  const a = s.indexOf('{'), b = s.lastIndexOf('}');
+  if (a >= 0 && b > a) { const t = s.slice(a, b + 1);
+    try { return JSON.parse(t); } catch {}
+    try { return JSON.parse(t.replace(/\\(?!["\\/bfnrtu])/g, '\\\\')); } catch {} }
+  throw new Error('AI 返回的内容不是合法 JSON，请重试');
+}
+
+async function analyze(it){
+  const text = buildUserMsg(it);
+  const user = (SETTINGS.vision && it.image)
+    ? [{type: 'text', text}, {type: 'image_url', image_url: {url: it.image}}]
+    : text + (it.image && !it.question ? '\n\n（注意：学生上传了图片但当前模型看不到图，请提醒学生补充题目文字）' : '');
+  const out = await callAI([{role: 'system', content: SYS_PROMPT}, {role: 'user', content: user}], true, {maxTokens: 7000});
+  const a = parseJSON(out);
+  a.analyzedAt = Date.now();
+  it.analysis = a;
+  if (!it.subject && a.subject) it.subject = a.subject;
+  if (!it.qtype && a.qtype) it.qtype = a.qtype;
+  await saveItem(it);
+}
+
+/* ========== 批量：从聊天记录里拆题 ========== */
+const EXTRACT_PROMPT = `你是错题整理助手。用户会粘贴一段文本，通常是TA和AI的聊天记录，里面混着多道做错的题目、TA的答案、AI的讲解。
+请把其中【每一道独立的题目】都找出来，只输出一个 json 对象：
+{"items":[{"subject":"学科","qtype":"选择题|填空题|判断题|简答题|论述题|计算题|材料分析题|其他","question":"完整题干（含全部选项/材料），尽量保持原文","my_answer":"学生的答案或做法（含写错的式子）","correct_answer":"正确答案","my_note":"学生自己说的想法、困惑、纠结点，尽量用原话","chat_context":"聊天中与这道题相关的原文摘录：学生怎么想的、哪里卡住了、AI是怎么指出错误和纠正的。保留关键原话和关键式子，可删去寒暄和重复，600字以内"}]}
+规则：
+1. 不要漏题，不同的题不要合并；同一道题被反复讨论只算一道。
+2. 不要编造：原文没有的字段填空字符串 ""。正确答案若聊天里AI已给出可以填上。
+3. question 只放题目本身（题干+选项/材料）。AI的讲解、“针对这道题……”之类的回复，绝对不要放进 question，要放进 chat_context。
+   如果聊天里只是提到“第3题”而没贴出题干，就根据上下文尽量还原题干，并在开头加“（据聊天还原）”。
+   学生的纠结（例如“我不知道该用A还是C”）要放进 my_note，它是复盘错因最重要的线索。
+4. 文本开头或结尾如果有被截断、明显不完整的题目，跳过它。
+5. 公式用 $...$ 的 LaTeX，json 里反斜杠要转义。
+6. 一道题都没有就输出 {"items":[]}。`;
+
+function chunkText(s, size = 4500, overlap = 600){
+  s = s.replace(/\r\n?/g, '\n').trim();
+  if (s.length <= size) return [s];
+  const out = []; let start = 0;
+  while (start < s.length) {
+    let end = Math.min(s.length, start + size);
+    if (end < s.length) {
+      const win = s.slice(start + size * .6, end);
+      const cut = Math.max(win.lastIndexOf('\n\n'), win.lastIndexOf('\n'));
+      if (cut > 0) end = start + Math.floor(size * .6) + cut;
+    }
+    out.push(s.slice(start, end));
+    if (end >= s.length) break;
+    start = Math.max(end - overlap, start + 1);
+  }
+  return out;
+}
+function parseItems(s){
+  try { return parseJSON(s).items || []; } catch {}
+  // 输出被截断：保留完整的那部分
+  const k = s.lastIndexOf('},');
+  if (k > 0) { try { return parseJSON(s.slice(0, k + 1) + ']}').items || []; } catch {} }
+  throw new Error('AI 返回格式有误');
+}
+const normQ = q => String(q || '').replace(/[\s\p{P}\p{S}]/gu, '').slice(0, 36);
+
+async function extractQuestions(text, onProgress){
+  const chunks = chunkText(text);
+  const model = /reasoner|r1/i.test(SETTINGS.model) && /deepseek/i.test(SETTINGS.baseUrl) ? 'deepseek-chat' : SETTINGS.model;
+  const found = [], seen = new Set(); let fails = 0, lastErr = '';
+  for (let i = 0; i < chunks.length; i++) {
+    onProgress?.(i, chunks.length);
+    try {
+      const out = await callAI([{role: 'system', content: EXTRACT_PROMPT}, {role: 'user', content: chunks[i]}], true, {model, maxTokens: 8000, temperature: .1});
+      for (const x of parseItems(out)) {
+        const k = normQ(x.question); if (!k || seen.has(k)) continue; seen.add(k);
+        found.push({subject: x.subject || '', qtype: x.qtype || '', question: (x.question || '').trim(), myAnswer: (x.my_answer || '').trim(),
+          correctAnswer: (x.correct_answer || '').trim(), myNote: (x.my_note || '').trim(), chatContext: (x.chat_context || '').trim()});
+      }
+    } catch (e) { fails++; lastErr = e.message; if (/401|402|API Key|网络/.test(e.message)) throw e; }
+  }
+  if (!found.length && fails) throw new Error(lastErr);
+  return {items: found, fails, chunks: chunks.length};
+}
+
+const newItem = o => Object.assign({id: uid(), created: Date.now(), followups: [], analysis: null, mastered: false, image: '',
+  review: {level: 0, due: Date.now() + DAY, history: []}}, o);
+
+async function analyzeMany(items, concurrency = 3){
+  const q = items.slice(); let done = 0, fail = 0, lastErr = '', stopped = false;
+  const stopBtn = $('#loadingStop'); stopBtn.hidden = false; stopBtn.onclick = () => { stopped = true; stopBtn.textContent = '正在停止…'; };
+  const show = () => $('#loadingText').textContent = `AI 复盘中 ${done}/${items.length}${fail ? `（失败 ${fail}）` : ''}`;
+  loading(true); show();
+  const worker = async () => {
+    while (q.length && !stopped) {
+      const it = q.shift();
+      try { await analyze(it); } catch (e) { fail++; lastErr = e.message; if (/401|402|API Key/.test(e.message)) stopped = true; }
+      done++; show();
+    }
+  };
+  await Promise.all(Array.from({length: Math.min(concurrency, items.length)}, worker));
+  stopBtn.hidden = true; stopBtn.textContent = '停止'; loading(false);
+  if (fail) toast(`完成 ${done - fail} 题，失败 ${fail} 题：${lastErr}`, 5000);
+  else if (stopped) toast(`已停止，完成 ${done} 题`);
+  else toast(`全部 ${done} 题复盘完成 ✨`);
+}
+
+/* ========== 路由 ========== */
+const main = $('#main');
+window.addEventListener('hashchange', route);
+async function route(){
+  const [v = 'list', id] = (location.hash.slice(1) || 'list').split('/');
+  document.querySelectorAll('nav.bottom a').forEach(a => a.classList.toggle('on', a.dataset.v === (v === 'item' || v === 'edit' ? 'list' : v)));
+  window.scrollTo(0, 0);
+  if (v === 'add') renderForm();
+  else if (v === 'edit') renderForm(id);
+  else if (v === 'item') renderDetail(id);
+  else if (v === 'review') renderReview();
+  else if (v === 'settings') renderSettings();
+  else renderList();
+}
+
+/* ========== 每日吉祥物：Microsoft Fluent Emoji 3D（MIT 开源，GitHub microsoft/fluentui-emoji） ========== */
+const MASCOTS = [
+  ['1f98a', '小狐狸'], ['1f431', '小猫咪'], ['1f430', '小兔子'], ['1f43c', '熊猫'], ['1f439', '仓鼠'], ['1f425', '小鸡仔'],
+  ['1f989', '猫头鹰'], ['1f427', '企鹅'], ['1f428', '考拉'], ['1f994', '刺猬'], ['1f9a6', '水獭'], ['1f9ad', '海豹'],
+  ['1f42c', '海豚'], ['1f433', '小鲸鱼'], ['1f436', '小狗'], ['1f43b', '小熊'], ['1f99d', '浣熊'], ['1f423', '破壳小鸡'],
+  ['1f422', '小乌龟'], ['1f984', '独角兽'], ['1f9f8', '泰迪熊'], ['1f98b', '蝴蝶'], ['1f40c', '小蜗牛'],
+];
+const EMOJI_SRC = [
+  c => `https://registry.npmmirror.com/@lobehub/fluent-emoji-3d/latest/files/assets/${c}.webp`,
+  c => `https://unpkg.com/@lobehub/fluent-emoji-3d@latest/assets/${c}.webp`,
+];
+const SAYINGS = ['错一次，记一辈子 ✨', '慢慢来，比较快', '今天也要把坑填平哦', '每道错题都是升级经验', '休息一下，喝口水吧 🍵', '你已经比昨天更厉害了'];
+const today = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+function dailyOrder(){
+  const r = rng(today() % 2147483646 + 1), a = MASCOTS.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const dailyMascot = (slot = 0) => dailyOrder()[slot % MASCOTS.length];
+function emojiImg([code, name]){
+  return `<img class="mascot" src="${EMOJI_SRC[0](code)}" data-c="${code}" data-i="0" alt="${name}" title="${name}" draggable="false" onerror="emojiFallback(this)">`;
+}
+function emojiFallback(img){
+  const i = +img.dataset.i + 1, c = img.dataset.c;
+  if (i < EMOJI_SRC.length) { img.dataset.i = i; img.src = EMOJI_SRC[i](c); return; }
+  const s = document.createElement('span'); s.className = 'mascot'; s.title = img.title;
+  s.textContent = String.fromCodePoint(...c.split('-').map(h => parseInt(h, 16)));
+  img.replaceWith(s);
+}
+function mascotHTML(slot = 1, say){
+  return `${emojiImg(dailyMascot(slot))}${say !== false ? `<div><span class="say">${say || SAYINGS[(today() + slot) % SAYINGS.length]}</span></div>` : ''}`;
+}
+function renderLogo(){
+  const logo = $('#logo'), m = dailyMascot(0); logo.innerHTML = emojiImg(m); logo.dataset.day = today();
+  logo.onclick = () => { logo.classList.remove('wiggle'); void logo.offsetWidth; logo.classList.add('wiggle'); toast(`今日小伙伴：${m[1]} · 明天会换新朋友哦`); };
+}
+// 跨过午夜也能自动换
+document.addEventListener('visibilitychange', () => { if (!document.hidden && $('#logo').dataset.day != today()) { renderLogo(); route(); } });
+
+/* ========== 错题本列表 ========== */
+const LF = {q: '', subject: '', root: '', due: false};
+function renderList(){
+  const subjects = [...new Set(ITEMS.map(i => i.subject).filter(Boolean))];
+  const now = Date.now();
+  let list = ITEMS.slice().sort((a, b) => b.created - a.created);
+  if (LF.subject) list = list.filter(i => i.subject === LF.subject);
+  if (LF.root) list = list.filter(i => i.analysis?.error_root?.category === LF.root);
+  if (LF.due) list = list.filter(i => !i.mastered && i.review.due <= now);
+  if (LF.q) { const k = LF.q.toLowerCase(); list = list.filter(i => JSON.stringify([i.question, i.subject, i.myNote, i.analysis?.title, i.analysis?.knowledge_points, i.analysis?.warning]).toLowerCase().includes(k)); }
+
+  const counts = {}; ITEMS.forEach(i => { const c = i.analysis?.error_root?.category; if (c) counts[c] = (counts[c] || 0) + 1; });
+  const maxC = Math.max(1, ...Object.values(counts));
+  const dueN = ITEMS.filter(i => !i.mastered && i.review.due <= now).length;
+  const noAI = ITEMS.filter(i => !i.analysis);
+
+  main.innerHTML = `
+  <div class="card">
+    <input id="sq" placeholder="🔍 搜索题目、考点、警示语…" value="${esc(LF.q)}">
+    <div class="chips" style="margin-top:10px">
+      <span class="chip ${!LF.subject ? 'on' : ''}" data-s="">全部学科</span>
+      ${subjects.map(s => `<span class="chip ${LF.subject === s ? 'on' : ''}" data-s="${esc(s)}">${esc(s)}</span>`).join('')}
+    </div>
+    <div class="chips">
+      <span class="chip burg ${LF.due ? 'on' : ''}" data-due="1">⏰ 待复习 ${dueN}</span>
+      ${ROOTS.filter(r => counts[r]).map(r => `<span class="chip rc ${LF.root === r ? 'on' : ''}" style="${rcStyle(r)}" data-r="${r}">${r}</span>`).join('')}
+    </div>
+    ${noAI.length ? `<button class="btn ghost sm" id="bulkAI" style="margin-top:4px">🦊 一键复盘未分析的 ${noAI.length} 题</button>` : ''}
+  </div>
+  ${Object.keys(counts).length ? `<details class="card"><summary style="cursor:pointer;color:var(--blue-d);font-weight:600">📊 我的错误根源分布（共 ${ITEMS.length} 题，已掌握 ${ITEMS.filter(i => i.mastered).length}）</summary>
+    <div class="bars" style="margin-top:10px">${ROOTS.filter(r => counts[r]).sort((a, b) => counts[b] - counts[a]).map(r => `<div class="b" style="${rcStyle(r)}"><span>${r}</span><div class="track"><div class="fill" style="width:${counts[r]/maxC*100}%"></div></div><em>${counts[r]}</em></div>`).join('')}</div></details>` : ''}
+  ${list.length ? list.map(itemCard).join('') : `<div class="empty">${mascotHTML(1)}<p>${ITEMS.length ? '没有符合条件的错题' : '还没有错题，点下方「录入」开始第一题吧'}</p>${ITEMS.length ? '' : '<a class="btn" href="#add">✒️ 录入错题</a>'}</div>`}`;
+
+  const sq = $('#sq'); sq.oninput = () => { LF.q = sq.value; clearTimeout(sq._t); sq._t = setTimeout(() => { renderList(); const n = $('#sq'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 300); };
+  main.querySelectorAll('[data-s]').forEach(c => c.onclick = () => { LF.subject = c.dataset.s; renderList(); });
+  main.querySelectorAll('[data-r]').forEach(c => c.onclick = () => { LF.root = LF.root === c.dataset.r ? '' : c.dataset.r; renderList(); });
+  main.querySelector('[data-due]').onclick = () => { LF.due = !LF.due; renderList(); };
+  const bulk = $('#bulkAI'); if (bulk) bulk.onclick = async () => {
+    if (!confirm(`用 AI 依次复盘 ${noAI.length} 道题？（会消耗 API 额度，可随时停止）`)) return;
+    await analyzeMany(noAI); renderList(); };
+  math(main);
+}
+function itemCard(i){
+  const a = i.analysis || {}; const due = !i.mastered && i.review.due <= Date.now();
+  const cat = a.error_root?.category;
+  return `<a class="card item ${i.mastered ? 'ok' : ''}" href="#item/${i.id}" ${cat && !i.mastered ? `style="${rcStyle(cat)}"` : ''}>
+    ${i.image ? `<img class="th" src="${i.image}" alt="">` : ''}
+    <div class="t">${esc(a.title || (i.question || '图片题').slice(0, 20))}</div>
+    <div class="q">${esc(i.question || '')}</div>
+    ${a.warning ? `<div class="w">⚑ ${esc(a.warning)}</div>` : ''}
+    <div class="meta">
+      ${i.subject ? `<span class="tag blue">${esc(i.subject)}</span>` : ''}
+      ${cat ? rcTag(cat) : (i.analysis ? '' : '<span class="tag" style="background:#edf2f7;color:#5f7488">未分析</span>')}
+      ${i.mastered ? '<span class="tag">✓ 已掌握</span>' : due ? '<span class="tag due">待复习</span>' : ''}
+      <span class="muted">${fmtDate(i.created)}</span>
+    </div></a>`;
+}
+
+/* ========== 录入 / 编辑 ========== */
+let FORM_MODE = sessionStorage.getItem('cuoti_mode') || 'single';
+const modeTabs = () => `<div class="seg">
+  <button class="${FORM_MODE === 'single' ? 'on' : ''}" data-mode="single">✒️ 单题录入</button>
+  <button class="${FORM_MODE === 'batch' ? 'on' : ''}" data-mode="batch">📋 批量导入${BATCH.items.length ? ` · ${BATCH.items.length}` : ''}</button></div>`;
+function bindTabs(){ main.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { FORM_MODE = b.dataset.mode; sessionStorage.setItem('cuoti_mode', FORM_MODE); renderForm(); }); }
+
+/* —— 批量导入 —— */
+const BATCH = {text: sessionStorage.getItem('cuoti_batch') || '', items: []};
+function renderBatch(){
+  const subjects = [...new Set(ITEMS.map(i => i.subject).filter(Boolean))];
+  const existing = new Set(ITEMS.map(i => normQ(i.question)));
+  const sel = BATCH.items.filter(x => x.on).length;
+  main.innerHTML = `${modeTabs()}
+  <div class="card">
+    <h3><span class="dot"></span>粘贴聊天记录，AI 自动拆题</h3>
+    <p class="muted" style="margin-top:0">把 DeepSeek 里和错题有关的对话整段复制过来，可以包含很多道题、你的答案和 AI 的讲解。很长也可以，会分段识别。</p>
+    <textarea id="bText" style="min-height:${BATCH.items.length ? 120 : 220}px" placeholder="例如：\n我：这道题我选了B，为什么错？\n1. 下列关于……的说法正确的是（ ）A. … B. … \nDeepSeek：正确答案是C，因为……\n我：还有一道……">${esc(BATCH.text)}</textarea>
+    <div class="row" style="margin-top:8px">
+      <span class="muted grow" id="bCount"></span>
+      ${BATCH.text ? '<button class="btn ghost sm" id="bClear">清空</button>' : ''}
+      <button class="btn" id="bGo">🔍 识别题目</button>
+    </div>
+  </div>
+  ${BATCH.items.length ? `
+  <div class="card">
+    <div class="row">
+      <b class="grow">识别出 ${BATCH.items.length} 道题，已选 ${sel} 道</b>
+      <button class="btn ghost sm" id="bAll">${sel === BATCH.items.length ? '全不选' : '全选'}</button>
+    </div>
+    <div class="row" style="margin-top:8px"><span class="muted">统一学科</span><input class="grow" id="bSub" list="subList2" placeholder="留空则用 AI 识别的学科"><datalist id="subList2">${subjects.map(s => `<option value="${esc(s)}">`).join('')}</datalist></div>
+  </div>
+  ${BATCH.items.map((x, i) => `
+  <div class="card bi ${x.on ? '' : 'off'}">
+    <label class="row bi-h"><input type="checkbox" data-on="${i}" ${x.on ? 'checked' : ''}><b>第 ${i + 1} 题</b>
+      ${x.subject ? `<span class="tag blue">${esc(x.subject)}</span>` : ''}${x.qtype ? `<span class="tag blue">${esc(x.qtype)}</span>` : ''}
+      ${existing.has(normQ(x.question)) ? '<span class="tag due">可能已录入过</span>' : ''}</label>
+    <div class="bq">${txt(x.question)}</div>
+    <div class="bmeta"><span style="color:var(--burg)">✗ ${esc(x.myAnswer || '未识别到我的答案')}</span>${x.correctAnswer ? ` <span style="color:var(--cyan-d)">✓ ${esc(x.correctAnswer.slice(0, 60))}</span>` : ''}</div>
+    ${x.myNote ? `<div class="bmeta muted">💭 ${esc(x.myNote.slice(0, 80))}</div>` : ''}
+    ${x.chatContext ? `<div class="bmeta muted">💬 已附带 ${x.chatContext.length} 字聊天讲解</div>` : ''}
+    <details class="bedit"><summary>✏️ 修改这题</summary>
+      <label class="f">题目</label><textarea data-f="question" data-i="${i}">${esc(x.question)}</textarea>
+      <div class="row"><div class="grow"><label class="f">学科</label><input data-f="subject" data-i="${i}" value="${esc(x.subject)}"></div>
+        <div class="grow"><label class="f">题型</label><input data-f="qtype" data-i="${i}" value="${esc(x.qtype)}"></div></div>
+      <label class="f">我的答案</label><textarea style="min-height:50px" data-f="myAnswer" data-i="${i}">${esc(x.myAnswer)}</textarea>
+      <label class="f">正确答案</label><textarea style="min-height:50px" data-f="correctAnswer" data-i="${i}">${esc(x.correctAnswer)}</textarea>
+      <label class="f">我的想法 / 纠结点</label><textarea style="min-height:50px" data-f="myNote" data-i="${i}">${esc(x.myNote)}</textarea>
+      <label class="f">聊天里的讲解（AI 复盘时会据此分析你怎么错的）</label><textarea data-f="chatContext" data-i="${i}">${esc(x.chatContext)}</textarea>
+    </details>
+  </div>`).join('')}
+  <div class="batch-bar">
+    <button class="btn ghost" id="bSave" ${sel ? '' : 'disabled'}>仅保存 ${sel} 题</button>
+    <button class="btn grow" id="bSaveAI" ${sel ? '' : 'disabled'}>🦊 保存并逐题 AI 复盘</button>
+  </div>` : ''}`;
+  bindTabs(); math(main);
+
+  const ta = $('#bText');
+  const count = () => { const n = ta.value.trim().length; $('#bCount').textContent = n ? `${n} 字${n > 4500 ? ` · 分 ${chunkText(ta.value).length} 段识别` : ''}` : ''; };
+  ta.oninput = () => { BATCH.text = ta.value; sessionStorage.setItem('cuoti_batch', BATCH.text); count(); };
+  count();
+  const clr = $('#bClear'); if (clr) clr.onclick = () => { if (!confirm('清空粘贴的内容和识别结果？')) return; BATCH.text = ''; BATCH.items = []; sessionStorage.removeItem('cuoti_batch'); renderBatch(); };
+  $('#bGo').onclick = async () => {
+    BATCH.text = ta.value.trim(); sessionStorage.setItem('cuoti_batch', BATCH.text);
+    if (BATCH.text.length < 10) return toast('先粘贴聊天记录');
+    if (BATCH.items.length && !confirm('重新识别会覆盖下方的识别结果，继续？')) return;
+    loading(true, 'AI 正在拆题…');
+    try {
+      const r = await extractQuestions(BATCH.text, (i, n) => $('#loadingText').textContent = n > 1 ? `AI 正在拆题… 第 ${i + 1}/${n} 段` : 'AI 正在拆题…');
+      const ex = new Set(ITEMS.map(i => normQ(i.question)));
+      BATCH.items = r.items.map(x => ({...x, on: !ex.has(normQ(x.question))}));
+      toast(r.items.length ? `识别出 ${r.items.length} 道题${r.fails ? `（${r.fails} 段识别失败，可重试）` : ''}，请检查` : '没找到题目，换一段试试', 3500);
+    } catch (e) { toast(e.message, 4500); }
+    finally { loading(false); renderBatch(); }
+  };
+  if (!BATCH.items.length) return;
+
+  main.querySelectorAll('[data-on]').forEach(c => c.onchange = () => { BATCH.items[c.dataset.on].on = c.checked; renderBatch(); });
+  $('#bAll').onclick = () => { const v = sel !== BATCH.items.length; BATCH.items.forEach(x => x.on = v); renderBatch(); };
+  main.querySelectorAll('[data-f]').forEach(f => f.oninput = () => { BATCH.items[f.dataset.i][f.dataset.f] = f.value; });
+  main.querySelectorAll('.bedit').forEach(d => d.addEventListener('toggle', () => { if (!d.open) renderBatch(); }));
+  const save = async () => {
+    const sub = $('#bSub').value.trim(), base = Date.now(), picked = BATCH.items.filter(x => x.on && x.question.trim());
+    const saved = [];
+    for (let i = 0; i < picked.length; i++) {
+      const {on, ...x} = picked[i];
+      const it = newItem({...x, subject: sub || x.subject, created: base - i});   // 保持原顺序
+      await saveItem(it); saved.push(it);
+    }
+    BATCH.items = BATCH.items.filter(x => !x.on);
+    if (!BATCH.items.length) { BATCH.text = ''; sessionStorage.removeItem('cuoti_batch'); }
+    return saved;
+  };
+  $('#bSave').onclick = async () => { const s = await save(); toast(`已保存 ${s.length} 道错题`); location.hash = '#list'; };
+  $('#bSaveAI').onclick = async () => { const s = await save(); await analyzeMany(s); location.hash = '#list'; };
+}
+
+function renderForm(id){
+  const it = id ? getItem(id) : null;
+  if (id && !it) return location.hash = '#list';
+  if (!it && FORM_MODE === 'batch') return renderBatch();
+  const subjects = [...new Set(ITEMS.map(i => i.subject).filter(Boolean))];
+  let img = it?.image || '';
+  main.innerHTML = `
+  ${it ? `<a class="back" href="#item/${it.id}">‹ 返回</a>` : modeTabs()}
+  <div class="card">
+    <h3><span class="dot"></span>${it ? '编辑错题' : '录入一道错题'}</h3>
+    <div class="row">
+      <div class="grow"><label class="f">学科</label><input id="fSub" list="subList" placeholder="可留空，AI 自动判断" value="${esc(it?.subject)}"><datalist id="subList">${subjects.map(s => `<option value="${esc(s)}">`).join('')}</datalist></div>
+      <div class="grow"><label class="f">题型</label><select id="fType">${['','选择题','填空题','判断题','简答题','论述题','计算题','材料分析题','其他'].map(t => `<option ${it?.qtype === t ? 'selected' : ''} value="${t}">${t || 'AI 自动判断'}</option>`).join('')}</select></div>
+    </div>
+    <label class="f">题目图片（可拍照）</label>
+    <div class="row">
+      <label class="btn ghost sm">📷 选择/拍照<input id="fImg" type="file" accept="image/*" hidden></label>
+      <button class="btn ghost sm" id="fOcr" ${img ? '' : 'hidden'}>🔤 识别图中文字</button>
+      <button class="btn ghost sm" id="fImgDel" ${img ? '' : 'hidden'}>移除图片</button>
+    </div>
+    <img id="fPrev" class="qimg" ${img ? `src="${img}"` : 'hidden'}>
+    <label class="f"><b>*</b> 题目内容（含选项）</label>
+    <textarea id="fQ" placeholder="粘贴或输入题目；有图片可先点「识别图中文字」">${esc(it?.question)}</textarea>
+    <label class="f"><b>*</b> 我的答案</label>
+    <textarea id="fMy" style="min-height:60px" placeholder="当时写的答案/选项">${esc(it?.myAnswer)}</textarea>
+    <label class="f">正确答案（可选，不填 AI 自己求解）</label>
+    <textarea id="fRight" style="min-height:60px">${esc(it?.correctAnswer)}</textarea>
+    <label class="f">我当时怎么想的（可选，帮 AI 更准地找错因）</label>
+    <textarea id="fNote" style="min-height:60px" placeholder="例如：我以为… / 没看到… / 纠结该用 A 还是 C…">${esc(it?.myNote)}</textarea>
+    <label class="f">之前和 AI 聊这题的记录（可选，粘过来 AI 能更准地还原你错在哪）</label>
+    <textarea id="fCtx" style="min-height:60px" placeholder="把 DeepSeek 里讲这道题的那段对话粘过来">${esc(it?.chatContext)}</textarea>
+    <div class="row" style="margin-top:16px">
+      <button class="btn grow" id="fAI">🦊 保存并 AI 复盘</button>
+      <button class="btn ghost" id="fSave">仅保存</button>
+    </div>
+    ${SETTINGS.apiKey ? '' : '<p class="muted" style="margin-bottom:0">提示：还没填 API Key，先去「设置」填好才能 AI 复盘。</p>'}
+  </div>`;
+  bindTabs();
+
+  $('#fImg').onchange = async e => { const f = e.target.files[0]; if (!f) return;
+    img = await compressImage(f); $('#fPrev').src = img; $('#fPrev').hidden = false; $('#fOcr').hidden = false; $('#fImgDel').hidden = false; };
+  $('#fImgDel').onclick = () => { img = ''; $('#fPrev').hidden = true; $('#fOcr').hidden = true; $('#fImgDel').hidden = true; };
+  $('#fOcr').onclick = async () => {
+    loading(true, '加载识别组件（首次约十几秒）…');
+    try { const t = await ocr(img); const q = $('#fQ'); q.value = q.value ? q.value + '\n' + t : t; toast('识别完成，请检查修正错字'); }
+    catch (e) { toast(e.message, 3500); } finally { loading(false); }
+  };
+  const collect = () => {
+    const o = it || newItem({});
+    Object.assign(o, {subject: $('#fSub').value.trim(), qtype: $('#fType').value, question: $('#fQ').value.trim(),
+      myAnswer: $('#fMy').value.trim(), correctAnswer: $('#fRight').value.trim(), myNote: $('#fNote').value.trim(), chatContext: $('#fCtx').value.trim(), image: img});
+    if (!o.question && !o.image) { toast('请填写题目或上传图片'); return null; }
+    return o;
+  };
+  $('#fSave').onclick = async () => { const o = collect(); if (!o) return; await saveItem(o); toast('已保存'); location.hash = '#item/' + o.id; };
+  $('#fAI').onclick = async () => {
+    const o = collect(); if (!o) return; await saveItem(o);
+    loading(true, '正在请老师批阅…（约 10~40 秒）');
+    try { await analyze(o); toast('复盘完成 ✨'); } catch (e) { toast(e.message, 4000); } finally { loading(false); location.hash = '#item/' + o.id; }
+  };
+}
+
+/* 错因对照：我怎么想的 → 错在哪 → 应该怎么想 */
+function wvrHTML(a){
+  const pairs = (a.wrong_vs_right || []).filter(p => p && (p.mine || p.fix));
+  if (!pairs.length && !a.my_wrong_path)
+    return `<p class="muted wvr-tip">💡 这条分析是旧版生成的，点底部「重新分析」即可得到「我的错误思路 ⇄ 纠正」对照。</p>`;
+  return `<div class="sub-h burg"><span>✗</span>我是怎么错的 · 逐条纠正</div>
+    ${a.my_wrong_path ? `<div class="wpath">“${txt(a.my_wrong_path)}”</div>` : ''}
+    ${pairs.map((p, i) => `<div class="wvr">
+      <div class="mine"><span class="lb">✗ 我当时 ${pairs.length > 1 ? i + 1 : ''}</span>${txt(p.mine)}</div>
+      ${p.why ? `<div class="why"><span>错在</span>${txt(p.why)}</div>` : ''}
+      <div class="fix"><span class="lb">✓ 应该</span>${txt(p.fix)}</div>
+    </div>`).join('')}`;
+}
+
+/* ========== 详情 ========== */
+const FOLD_KEY = 'cuoti_fold';
+const FOLD = JSON.parse(localStorage.getItem(FOLD_KEY) || '{}');
+function renderDetail(id){
+  const it = getItem(id); if (!it) return location.hash = '#list';
+  const a = it.analysis;
+  const list = (arr, cls) => (arr || []).filter(Boolean).length ? `<ul class="pts ${cls}">${arr.filter(Boolean).map(x => `<li>${txt(x)}</li>`).join('')}</ul>` : '';
+  const cmp = a?.comparison;
+  const ofuda = a?.warning ? `<div class="ofuda-wrap"><div class="ofuda v" id="ofuda" title="点击复制"><div class="txt">${esc(a.warning)}</div><div class="seal">戒</div></div></div>` : '';
+
+  // 可折叠分区：折叠状态全局记住（例如你习惯收起「对比表」，每道题都会收起）
+  const NAV = [];
+  const sec = (key, label, title, dot, body, def = true) => {
+    if (!body) return '';
+    NAV.push([key, label]);
+    const open = FOLD[key] ?? def;
+    return `<details class="card fold" id="sec-${key}" data-k="${key}" ${open ? 'open' : ''}>
+      <summary><h3><span class="dot" ${dot ? `style="background:${dot}"` : ''}></span>${title}</h3><span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">${body}</div></details>`;
+  };
+  const stepsBody = a ? `${wvrHTML(a)}
+    <div class="sub-h"><span>✓</span>正确解法 · 逐步推导</div>
+    <ol class="steps">${(a.correct_steps || []).map(s => `<li>${txt(String(s).replace(/^第\s*\d+\s*步[：:]\s*/, ''))}</li>`).join('')}</ol>`
+    : `<div class="empty" style="padding:20px">${mascotHTML(2, false)}<p>还没有 AI 复盘，点下方「AI 复盘」试试</p></div>`;
+  const cmpBody = cmp?.rows?.length ? `<div class="tblwrap"><table class="cmp"><thead><tr>${(cmp.headers || []).map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${cmp.rows.map(r => `<tr>${r.map(c => `<td>${txt(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '';
+  const fus = it.followups || [];
+
+  NAV.push(['q', '题目']);
+  const stepsSec = sec('steps', '思路', '错因对照 · 题旁批注', '', stepsBody);
+  const rest = a ? [
+    sec('root', '根源', `<span style="color:${(ROOT_COLORS[a.error_root?.category] || ROOT_COLORS['其他'])[0]}">错误根源</span>`, (ROOT_COLORS[a.error_root?.category] || ROOT_COLORS['其他'])[0],
+      `<div class="root" style="${rcStyle(a.error_root?.category)}"><div class="cat">${esc(a.error_root?.category || '—')}</div><div style="margin-top:6px">${txt(a.error_root?.detail)}</div></div>`),
+    sec('essence', '精华', '精华总结', '', a.essence ? `<div class="essence">${txt(a.essence)}</div>` : ''),
+    sec('traps', '挖坑', '选择题挖坑点', 'var(--burg)', list(a.traps, 'trap')),
+    sec('score', '得分', '简答得分要点', '', list(a.scoring_points, 'score')),
+    sec('ext', '延伸', '论述延伸角度', 'var(--blue)', list(a.extension_angles, 'ext')),
+    sec('cmp', '对比', esc(cmp?.title || '易混淆知识点对比'), '', cmpBody),
+  ].join('') : '';
+  const fuSec = sec('fu', '追问', `追问老师${fus.length ? ` <span class="muted">(${fus.length})</span>` : ''}`, '',
+    `${fus.map(f => `<div class="fu"><div class="uq">问：${txt(f.q)}</div><div class="ua">${txt(f.a)}</div></div>`).join('')}
+     <div class="row" style="margin-top:8px"><input class="grow" id="fuQ" placeholder="哪里还没懂？比如：第3步为什么这样变形"><button class="btn sm" id="fuGo">发送</button></div>`, fus.length > 0);
+
+  main.innerHTML = `
+  <div class="secnav">
+    <a class="back" href="#list">‹</a>
+    <button class="chip tog" id="foldAll">全部收起</button>
+    ${NAV.map(([k, l]) => `<button class="chip" data-go="${k}">${l}</button>`).join('')}
+    <button class="chip" data-go="act">操作</button>
+  </div>
+  <div class="detail-grid">
+    <div class="card" id="sec-q">
+      <div class="side-note">
+        <div class="qcol">
+          <div style="margin-bottom:8px">
+            ${it.subject ? `<span class="tag blue">${esc(it.subject)}</span>` : ''}${it.qtype ? `<span class="tag blue">${esc(it.qtype)}</span>` : ''}
+            ${(a?.knowledge_points || []).map(k => `<span class="tag">${esc(k)}</span>`).join('')}
+          </div>
+          ${a?.title ? `<h3 style="font-size:17px;color:var(--ink)">${esc(a.title)}</h3>` : ''}
+          <div class="clampbox clamped" id="qbox">
+            ${it.image ? `<img class="qimg" src="${it.image}">` : ''}
+            <div class="qtext">${txt(it.question)}</div>
+          </div>
+          <button class="morebtn" id="qMore" hidden>展开全文 ▾</button>
+          <div class="wrong"><span class="lb">✗ 我的答案</span>${txt(it.myAnswer || '（未填）')}</div>
+          ${(it.correctAnswer || a?.final_answer) ? `<div class="right"><span class="lb">✓ 正确答案</span>${txt(a?.final_answer || it.correctAnswer)}</div>` : ''}
+          ${it.myNote ? `<p class="muted">💭 我当时：${txt(it.myNote)}</p>` : ''}
+          ${it.chatContext ? `<details class="ctx"><summary>💬 当时和 AI 的聊天记录</summary><div>${txt(it.chatContext)}</div></details>` : ''}
+        </div>
+        ${ofuda}
+      </div>
+    </div>
+    ${stepsSec}
+  </div>
+  <div style="height:14px"></div>
+  ${rest}
+  ${fuSec}
+  <div class="row" id="sec-act" style="justify-content:center;margin-top:6px">
+    <button class="btn ${a ? 'ghost' : ''}" id="dAI">🦊 ${a ? '重新分析' : 'AI 复盘'}</button>
+    <a class="btn ghost" href="#edit/${it.id}">✏️ 编辑</a>
+    <button class="btn ghost" id="dMaster">${it.mastered ? '↺ 标为未掌握' : '✓ 已掌握'}</button>
+    <button class="btn ghost" id="dDel" style="color:var(--burg)">删除</button>
+  </div>`;
+
+  math(main);
+  // 长题目：默认只显示一截
+  const qb = $('#qbox'), qm = $('#qMore');
+  const measure = () => {
+    if (qb.dataset.open || !qb.isConnected) return;
+    qb.classList.add('clamped');
+    const long = qb.scrollHeight > qb.clientHeight + 30;
+    qb.classList.toggle('clamped', long); qm.hidden = !long;
+  };
+  qb.querySelectorAll('img').forEach(im => im.addEventListener('load', measure));
+  if (window.ResizeObserver) new ResizeObserver(() => requestAnimationFrame(measure)).observe(qb.parentElement);
+  requestAnimationFrame(measure);
+  qm.onclick = () => { const open = !qb.dataset.open; if (open) qb.dataset.open = 1; else delete qb.dataset.open;
+    qb.classList.toggle('clamped', !open); qm.textContent = open ? '收起 ▴' : '展开全文 ▾'; if (!open) qb.scrollIntoView({block: 'nearest'}); };
+  // 折叠记忆
+  const folds = [...main.querySelectorAll('details.fold')];
+  const syncAll = () => { $('#foldAll').textContent = folds.some(d => d.open) ? '全部收起' : '全部展开'; };
+  folds.forEach(d => d.addEventListener('toggle', () => { FOLD[d.dataset.k] = d.open; localStorage.setItem(FOLD_KEY, JSON.stringify(FOLD)); syncAll(); }));
+  syncAll();
+  $('#foldAll').onclick = () => { const open = !folds.some(d => d.open); folds.forEach(d => d.open = open); };
+  main.querySelectorAll('[data-go]').forEach(b => b.onclick = () => {
+    const el = $('#sec-' + b.dataset.go); if (!el) return;
+    if (el.tagName === 'DETAILS') el.open = true;
+    el.scrollIntoView({behavior: 'smooth', block: 'start'});
+  });
+  const of = $('#ofuda'); if (of) of.onclick = () => navigator.clipboard?.writeText(a.warning).then(() => toast('警示语已复制'));
+  $('#dAI').onclick = async () => { loading(true, '正在请老师批阅…（约 10~40 秒）');
+    try { await analyze(it); toast('复盘完成 ✨'); } catch (e) { toast(e.message, 4000); } finally { loading(false); renderDetail(id); } };
+  $('#dMaster').onclick = async () => { it.mastered = !it.mastered; if (!it.mastered) { it.review.level = 0; it.review.due = Date.now(); } await saveItem(it); renderDetail(id); };
+  $('#dDel').onclick = async () => { if (!confirm('确定删除这道错题？')) return; await DB.del(id); ITEMS = ITEMS.filter(x => x.id !== id); location.hash = '#list'; };
+  $('#fuGo').onclick = async () => {
+    const q = $('#fuQ').value.trim(); if (!q) return;
+    const msgs = [{role: 'system', content: '你是耐心的学科老师，正在给学生讲解一道错题。回答简洁清楚，必要时分步骤，公式用 $...$ 的 LaTeX。不要用 markdown 标题。'},
+      {role: 'user', content: buildUserMsg(it)},
+      {role: 'assistant', content: a ? JSON.stringify(a) : '好的，请问哪里不懂？'}];
+    (it.followups || []).forEach(f => msgs.push({role: 'user', content: f.q}, {role: 'assistant', content: f.a}));
+    msgs.push({role: 'user', content: q});
+    loading(true, '老师思考中…');
+    try { const ans = await callAI(msgs, false); it.followups = it.followups || []; it.followups.push({q, a: ans.replace(/\*\*/g, '').trim(), t: Date.now()}); await saveItem(it); }
+    catch (e) { toast(e.message, 4000); } finally { loading(false); renderDetail(id); }
+  };
+}
+
+/* ========== 复习（简易间隔重复） ========== */
+let RV = {mode: 'card', queue: null, idx: 0, show: false, subject: ''};
+function renderReview(){
+  const now = Date.now();
+  const subjects = [...new Set(ITEMS.map(i => i.subject).filter(Boolean))];
+  const pool = ITEMS.filter(i => !RV.subject || i.subject === RV.subject);
+  if (!RV.queue) RV.queue = pool.filter(i => !i.mastered && i.review.due <= now).sort((a, b) => a.review.due - b.review.due).map(i => i.id);
+  const head = `
+  <div class="card">
+    <div class="chips">
+      <span class="chip ${RV.mode === 'card' ? 'on' : ''}" data-m="card">🃏 卡片复习</span>
+      <span class="chip ${RV.mode === 'warn' ? 'on' : ''}" data-m="warn">⚑ 警示语速览</span>
+    </div>
+    <div class="chips">
+      <span class="chip ${!RV.subject ? 'on' : ''}" data-s="">全部</span>
+      ${subjects.map(s => `<span class="chip ${RV.subject === s ? 'on' : ''}" data-s="${esc(s)}">${esc(s)}</span>`).join('')}
+    </div>
+  </div>`;
+  let body = '';
+  if (RV.mode === 'warn') {
+    const ws = pool.filter(i => i.analysis?.warning);
+    body = `<div class="card warn-list">${ws.length ? ws.map(i => `<a class="wl" href="#item/${i.id}">${rcTag(i.analysis.error_root?.category)}<b>${esc(i.analysis.warning)}</b></a>`).join('') : '<p class="muted">暂无警示语</p>'}</div>`;
+  } else {
+    const it = getItem(RV.queue[RV.idx]);
+    if (!it) body = `<div class="empty">${mascotHTML(3)}<p>${RV.queue.length ? `本轮复习完成！共 ${RV.queue.length} 题 🎉` : '今天没有待复习的错题，休息一下吧 🌸'}</p>
+       <button class="btn ghost" id="rvAll">再来一轮：抽 10 道未掌握的</button></div>`;
+    else { const a = it.analysis || {};
+      body = `<p class="muted" style="text-align:center">第 ${RV.idx + 1} / ${RV.queue.length} 题 · 已连续答对 ${it.review.level} 次</p>
+      <div class="card rv-card">
+        <div>${it.subject ? `<span class="tag blue">${esc(it.subject)}</span>` : ''}${it.qtype ? `<span class="tag blue">${esc(it.qtype)}</span>` : ''}</div>
+        ${it.image ? `<img class="qimg" src="${it.image}">` : ''}
+        <div class="qtext">${txt(it.question)}</div>
+        ${RV.show ? `<div class="hr"></div>
+          <div class="wrong"><span class="lb">✗ 上次错答</span>${txt(it.myAnswer)}</div>
+          ${(a.final_answer || it.correctAnswer) ? `<div class="right"><span class="lb">✓ 正确答案</span>${txt(a.final_answer || it.correctAnswer)}</div>` : ''}
+          ${a.error_root ? `<p>${rcTag(a.error_root.category)}${txt(a.error_root.detail)}</p>` : ''}
+          ${(a.wrong_vs_right || []).length ? `<div style="margin-top:10px">${wvrHTML(a)}</div>` : ''}
+          ${a.correct_steps ? `<div class="sub-h"><span>✓</span>正确解法</div><ol class="steps">${a.correct_steps.map(s => `<li>${txt(String(s).replace(/^第\s*\d+\s*步[：:]\s*/, ''))}</li>`).join('')}</ol>` : ''}
+          ${a.warning ? `<div class="ofuda-wrap" style="margin-top:10px"><div class="ofuda"><div class="txt">${esc(a.warning)}</div><div class="seal">戒</div></div></div>` : ''}
+          <div class="rv-actions">
+            <button class="btn burg" data-g="0">还是不会</button>
+            <button class="btn ghost" data-g="1">有点模糊</button>
+            <button class="btn" data-g="2">完全掌握</button>
+          </div>`
+        : `<p class="muted" style="text-align:center;margin-top:20px">先在草稿纸上自己做一遍，再看解析 ✍️</p><button class="btn block" id="rvShow">看解析</button>`}
+      </div>`; }
+  }
+  main.innerHTML = head + body;
+  math(main);
+  main.querySelectorAll('[data-m]').forEach(c => c.onclick = () => { RV.mode = c.dataset.m; renderReview(); });
+  main.querySelectorAll('[data-s]').forEach(c => c.onclick = () => { RV.subject = c.dataset.s; RV.queue = null; RV.idx = 0; RV.show = false; renderReview(); });
+  const sh = $('#rvShow'); if (sh) sh.onclick = () => { RV.show = true; renderReview(); };
+  const all = $('#rvAll'); if (all) all.onclick = () => {
+    RV.queue = pool.filter(i => !i.mastered).sort(() => Math.random() - .5).slice(0, 10).map(i => i.id); RV.idx = 0; RV.show = false;
+    if (!RV.queue.length) toast('没有未掌握的错题'); renderReview(); };
+  main.querySelectorAll('[data-g]').forEach(b => b.onclick = async () => {
+    const it = getItem(RV.queue[RV.idx]); const g = +b.dataset.g; const r = it.review;
+    if (g === 0) { r.level = 0; r.due = Date.now() + DAY / 2; }
+    else if (g === 1) { r.due = Date.now() + DAY; }
+    else { r.level++; r.due = Date.now() + INTERVALS[Math.min(r.level - 1, INTERVALS.length - 1)] * DAY; if (r.level >= INTERVALS.length) { it.mastered = true; toast('这题已彻底掌握，移出复习 🎉'); } }
+    r.history.push({t: Date.now(), g}); await saveItem(it);
+    RV.idx++; RV.show = false; renderReview(); window.scrollTo(0, 0);
+  });
+}
+
+/* ========== 设置 ========== */
+function renderSettings(){
+  main.innerHTML = `
+  <div class="card">
+    <h3><span class="dot"></span>DeepSeek 接入</h3>
+    <label class="f">API Key（在 platform.deepseek.com 申请，只保存在本机浏览器）</label>
+    <input id="sKey" type="password" placeholder="sk-..." value="${esc(SETTINGS.apiKey)}">
+    <label class="f">接口地址（兼容 OpenAI 格式，可换其它服务商）</label>
+    <input id="sBase" value="${esc(SETTINGS.baseUrl)}">
+    <label class="f">模型</label>
+    <input id="sModel" list="mList" value="${esc(SETTINGS.model)}">
+    <datalist id="mList"><option value="deepseek-chat"><option value="deepseek-reasoner"></datalist>
+    <p class="muted">deepseek-chat：快、便宜，日常够用；deepseek-reasoner：推理更强（适合难的数理题），慢一些、贵一些。</p>
+    <label class="row" style="gap:8px;margin-top:6px"><input type="checkbox" id="sVision" style="width:auto" ${SETTINGS.vision ? 'checked' : ''}><span class="muted">把图片直接发给模型（仅当你换成支持看图的模型时才勾选；DeepSeek 文本模型请用「识别图中文字」）</span></label>
+    <div class="row" style="margin-top:12px"><button class="btn" id="sSave">保存设置</button><button class="btn ghost" id="sTest">测试连接</button></div>
+  </div>
+  <div class="card">
+    <h3><span class="dot"></span>外观</h3>
+    <label class="f" style="margin-top:0">主题（右上角调色盘也能一键切换）</label>
+    <div class="themes">${Object.entries(THEMES).map(([k, t]) => `<button class="th-card ${SETTINGS.theme === k ? 'on' : ''}" data-theme="${k}"><div class="pv ${k}">${t.preview()}</div><span>${t.name}</span></button>`).join('')}</div>
+    <label class="row" style="gap:8px;margin-top:12px"><input type="checkbox" id="sMotion" style="width:auto" ${SETTINGS.motion ? 'checked' : ''}><span>背景动画（手机卡顿时可关闭，保留静态画面）</span></label>
+    <label class="f">自定义背景图（可以放你喜欢的插画，会淡淡地铺在底层）</label>
+    <div class="row"><label class="btn ghost sm">🖼 选择图片<input id="sBg" type="file" accept="image/*" hidden></label><button class="btn ghost sm" id="sBgDel">移除背景</button></div>
+  </div>
+  <div class="card">
+    <h3><span class="dot"></span>数据备份</h3>
+    <p class="muted">所有错题只存在当前浏览器里。换手机、清缓存前记得导出备份！</p>
+    <div class="row"><button class="btn ghost" id="sExp">⬇ 导出备份</button><label class="btn ghost">⬆ 导入备份<input id="sImp" type="file" accept=".json,application/json" hidden></label></div>
+    <p class="muted">共 ${ITEMS.length} 道错题</p>
+  </div>
+  <p class="credit">每日小伙伴图标来自 <a href="https://github.com/microsoft/fluentui-emoji" target="_blank" rel="noopener">Microsoft Fluent Emoji</a>（MIT 开源协议）</p>`;
+  const read = () => { SETTINGS.apiKey = $('#sKey').value.trim(); SETTINGS.baseUrl = $('#sBase').value.trim() || 'https://api.deepseek.com';
+    SETTINGS.model = $('#sModel').value.trim() || 'deepseek-chat'; SETTINGS.vision = $('#sVision').checked; saveSettings(); };
+  $('#sSave').onclick = () => { read(); toast('已保存'); };
+  $('#sTest').onclick = async () => { read(); loading(true, '测试中…');
+    try { const r = await callAI([{role: 'user', content: '回复“连接成功”四个字'}], false); toast('✅ ' + r.slice(0, 30)); } catch (e) { toast(e.message, 4500); } finally { loading(false); } };
+  main.querySelectorAll('.th-card').forEach(c => c.onclick = () => { setTheme(c.dataset.theme); renderSettings(); });
+  $('#sMotion').onchange = e => { SETTINGS.motion = e.target.checked; saveSettings(); fx(); };
+  $('#sBg').onchange = async e => { const f = e.target.files[0]; if (!f) return; const d = await compressImage(f, 1800, .8); await DB.setKV('bg', d); applyBg(d); toast('背景已更新'); };
+  $('#sBgDel').onclick = async () => { await DB.setKV('bg', ''); applyBg(''); };
+  $('#sExp').onclick = () => {
+    const blob = new Blob([JSON.stringify({version: 1, exported: Date.now(), items: ITEMS})], {type: 'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `错题本备份_${new Date().toISOString().slice(0, 10)}.json`; a.click();
+  };
+  $('#sImp').onchange = async e => { const f = e.target.files[0]; if (!f) return;
+    try { const d = JSON.parse(await f.text()); const arr = d.items || d; let n = 0;
+      for (const it of arr) { if (!it.id) continue; it.review = it.review || {level: 0, due: Date.now(), history: []}; await saveItem(it); n++; }
+      toast(`导入 ${n} 道错题`); renderSettings(); } catch (err) { toast('导入失败：文件格式不对'); } };
+}
+
+/* ========== 装饰 ========== */
+function applyBg(d){ const b = $('#bgLayer'); b.style.backgroundImage = d ? `url(${d})` : ''; b.classList.toggle('on', !!d); }
+function rng(seed){ return () => (seed = seed * 16807 % 2147483647) / 2147483647; }
+const f1 = n => n.toFixed(1);
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+/* 枫叶轮廓：5 个尖裂片 + 锯齿边，程序生成 */
+const MAPLE_LOBES = [[0, 1, 30], [50, .88, 28], [-50, .88, 28], [102, .56, 24], [-102, .56, 24]];
+const MAPLE = (() => {
+  const base = .24; let d = '';
+  for (let i = 0; i <= 120; i++) {
+    const th = -180 + i * 3; let r = base;
+    for (const [a, L, w] of MAPLE_LOBES) { const dd = Math.abs(th - a); if (dd < w) r = Math.max(r, base + (L - base) * Math.pow(1 - dd / w, 1.35)); }
+    if (Math.abs(th) > 150) r = .14;
+    if (r > base + .08 && i % 2) r -= .035;
+    const rad = th * Math.PI / 180;
+    d += (i ? 'L' : 'M') + f1(50 + Math.sin(rad) * r * 46) + ' ' + f1(56 - Math.cos(rad) * r * 46);
+  }
+  return d + 'Z';
+})();
+const MAPLE_VEINS = MAPLE_LOBES.map(([a, L]) => { const rad = a * Math.PI / 180; return `M50 56L${f1(50 + Math.sin(rad) * L * 40)} ${f1(56 - Math.cos(rad) * L * 40)}`; }).join('');
+function mapleSVG(id, c1, c2){
+  return `<svg viewBox="0 0 100 100"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
+    <path d="M50 60Q52 80 48 98" stroke="${c2}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="${MAPLE}" fill="url(#${id})"/><path d="${MAPLE_VEINS}" stroke="rgba(255,255,255,.55)" stroke-width="1" fill="none" stroke-linecap="round"/></svg>`;
+}
+const PETAL = 'M12 22c-3.2-1.6-6-5.2-6-10 0-3.8 2.4-7.2 4.4-9.3L12 4.6l1.6-1.9C15.6 4.8 18 8.2 18 12c0 4.8-2.8 8.4-6 10z';
+function petalSVG(id, sz, c){
+  return `<svg width="${f1(sz)}" height="${f1(sz)}" viewBox="0 0 24 24"><defs><radialGradient id="${id}" cx=".5" cy=".85" r=".9"><stop offset="0" stop-color="#fff"/><stop offset=".75" stop-color="${c}"/></radialGradient></defs>
+    <path d="${PETAL}" fill="url(#${id})" fill-opacity=".85"/></svg>`;
+}
+const BLEAF = 'M2 12Q10 7.5 22 12Q10 15.5 2 12z';
+
+function bambooSVG(seed){
+  const r = rng(seed); let s = '';
+  for (const [x0, w] of [[55, 15], [118, 10], [182, 17], [248, 9]]) {
+    const lean = (r() - .5) * 46; let y = 1010;
+    while (y > -60) {
+      const h = 95 + r() * 55, x = x0 + lean * (1 - y / 1000);
+      s += `<rect x="${f1(x - w / 2)}" y="${f1(y - h + 3)}" width="${w}" height="${f1(h - 3)}" rx="${f1(w / 3)}"/>`;
+      s += `<rect x="${f1(x - w / 2 - 1.5)}" y="${f1(y - h)}" width="${w + 3}" height="2.6" rx="1.3"/>`;
+      if (r() < .6 && y < 880) {
+        const dir = r() < .5 ? -1 : 1, bx = x + dir * w / 2, by = y - h, tx = bx + dir * (22 + r() * 30), ty = by - 8 - r() * 22;
+        s += `<path d="M${f1(bx)} ${f1(by)}Q${f1((bx + tx) / 2)} ${f1(by - 3)} ${f1(tx)} ${f1(ty)}" stroke="currentColor" stroke-width="2" fill="none"/>`;
+        const n = 3 + Math.floor(r() * 3);
+        for (let k = 0; k < n; k++) {
+          const L = 48 + r() * 46, ang = dir > 0 ? 8 + r() * 62 : 110 + r() * 62;
+          s += `<g transform="translate(${f1(tx)} ${f1(ty)}) rotate(${Math.round(ang)})"><path class="lv" style="animation-delay:${(-r() * 4).toFixed(2)}s;animation-duration:${(3 + r() * 2).toFixed(1)}s" d="M0 0Q${f1(L * .35)} ${f1(-L * .13)} ${f1(L)} 0Q${f1(L * .35)} ${f1(L * .11)} 0 0Z"/></g>`;
+        }
+      }
+      y -= h;
+    }
+  }
+  return `<svg viewBox="0 0 300 1000" preserveAspectRatio="xMidYMax slice" fill="currentColor">${s}</svg>`;
+}
+
+/* 飘落物：静止模式下随机散落在屏幕上 */
+function falling(add, n, html){
+  for (let i = 0; i < n; i++) {
+    const d = rnd(12, 24);
+    add('fall', html(i), SETTINGS.motion
+      ? `left:${f1(rnd(-5, 100))}vw;animation-duration:${f1(d)}s;animation-delay:${f1(-rnd(0, d))}s`
+      : `left:${f1(rnd(0, 95))}vw;top:${f1(rnd(5, 90))}vh`);
+  }
+}
+const swayStyle = () => `style="animation-duration:${f1(rnd(2.4, 4.6))}s;animation-delay:${f1(-rnd(0, 3))}s"`;
+
+const THEMES = {
+  sakura: {
+    name: '樱青 · 春', color: '#d4f0f0',
+    build(add){
+      const cs = ['#f6b8c8', '#f9cdd8', '#f3a5bb', '#fde3ea', '#cdeef0', '#f7c3d0'];
+      falling(add, innerWidth < 600 ? 16 : 26, i => petalSVG('pt' + i, rnd(16, 28), cs[i % cs.length]).replace('<svg', '<svg ' + swayStyle()));
+    },
+    preview: () => [[12, 10, 18, '#f6b8c8', 20], [52, 34, 14, '#f3a5bb', -30], [78, 8, 16, '#cdeef0', 60], [30, 44, 12, '#f9cdd8', 110]]
+      .map(([x, y, s, c, r], i) => petalSVG('pp' + i, s, c).replace('<svg', `<svg style="left:${x}%;top:${y}px;transform:rotate(${r}deg)"`)).join(''),
+  },
+  maple: {
+    name: '枫红 · 秋', color: '#fdeee8',
+    build(add){
+      add('sun');
+      const k = innerWidth < 600 ? .58 : 1;
+      const pal = [['#f68a63', '#d83a3f'], ['#f7a957', '#e4573a'], ['#f2745e', '#bf2d40'], ['#f8be6a', '#ec7040']];
+      const slots = [
+        [-7, 4, 300, -20, 12, .34, 0], [70, -6, 380, 28, 55, .26, 3], [80, 40, 230, -42, -12, .36, 0],
+        [-9, 56, 270, 14, 42, .3, 2], [56, 70, 330, -16, 16, .24, 4], [30, 16, 180, 62, 92, .16, 5], [18, 80, 170, -64, -30, .22, 1]];
+      slots.forEach(([l, t, s, r0, r1, o, b], i) => {
+        const d = rnd(16, 24), sz = s * k;
+        const [c1, c2] = pal[i % pal.length];
+        add('bigleaf', mapleSVG('ml' + i, c1, c2),
+          `left:${l}vw;top:${t}vh;width:${f1(sz)}px;height:${f1(sz)}px;filter:blur(${b}px);` +
+          `--o:${o};--r0:${r0}deg;--r1:${r1}deg;--dx:${f1(rnd(-40, 40))}px;--dy:${f1(rnd(20, 60))}px;--d:${f1(d)}s;--dl:${f1(-d * i / slots.length)}s`);
+      });
+      falling(add, innerWidth < 600 ? 4 : 7, i => { const [c1, c2] = pal[i % pal.length]; const s = rnd(22, 34);
+        return mapleSVG('mf' + i, c1, c2).replace('<svg', `<svg width="${f1(s)}" height="${f1(s)}" ${swayStyle()} opacity=".7"`); });
+      for (let i = 0; i < (innerWidth < 600 ? 6 : 10); i++) {
+        const s = rnd(8, 26);
+        add('bokeh', '', `left:${f1(rnd(0, 96))}vw;top:${f1(rnd(5, 90))}vh;width:${f1(s)}px;height:${f1(s)}px;animation-duration:${f1(rnd(6, 12))}s;animation-delay:${f1(-rnd(0, 12))}s`);
+      }
+    },
+    preview: () => mapleSVG('pm1', '#f68a63', '#d83a3f').replace('<svg', '<svg style="left:-12%;top:-20px;width:90px;height:90px;opacity:.55;transform:rotate(-18deg)"') +
+      mapleSVG('pm2', '#f7a957', '#e4573a').replace('<svg', '<svg style="right:-6%;top:12px;width:62px;height:62px;opacity:.45;transform:rotate(30deg)"'),
+  },
+  bamboo: {
+    name: '竹青 · 夏', color: '#dcefee',
+    build(add){
+      add('rays');
+      add('fx-bamboo l', bambooSVG(7)); add('fx-bamboo r', bambooSVG(29));
+      const cs = ['#2a978c', '#3b7fb3', '#5fb3a5'];
+      falling(add, innerWidth < 600 ? 5 : 8, i => { const s = rnd(26, 40);
+        return `<svg width="${f1(s)}" height="${f1(s)}" viewBox="0 0 24 24" ${swayStyle()}><path d="${BLEAF}" fill="${cs[i % 3]}" fill-opacity=".45"/><path d="M3 12H20" stroke="#fff" stroke-opacity=".5" stroke-width=".5"/></svg>`; });
+    },
+    preview: () => `<svg viewBox="0 0 100 70" preserveAspectRatio="none" style="inset:0;width:100%;height:100%;color:#1f6a78;opacity:.25" fill="currentColor">
+      <rect x="14" y="0" width="6" height="70" rx="2"/><rect x="12.5" y="22" width="9" height="1.6"/><rect x="12.5" y="48" width="9" height="1.6"/>
+      <rect x="78" y="0" width="5" height="70" rx="2"/><rect x="76.8" y="30" width="7.4" height="1.4"/>
+      <path d="M20 22Q30 16 44 18Q30 24 20 22z"/><path d="M20 23Q28 28 38 34Q26 30 20 23z"/><path d="M78 30Q66 24 56 26Q66 33 78 30z"/></svg>`,
+  },
+};
+
+function fx(){
+  document.querySelectorAll('.fx').forEach(e => e.remove());
+  document.documentElement.classList.toggle('still', !SETTINGS.motion);
+  const add = (cls, html, style) => { const d = document.createElement('div'); d.className = 'fx ' + cls; d.innerHTML = html || ''; if (style) d.style.cssText = style; document.body.appendChild(d); return d; };
+  (THEMES[SETTINGS.theme] || THEMES.sakura).build(add);
+}
+function setTheme(k){
+  SETTINGS.theme = k; saveSettings();
+  document.documentElement.dataset.theme = k;
+  document.querySelector('meta[name="theme-color"]').content = THEMES[k].color;
+  fx();
+}
+$('#themeBtn').onclick = () => { const ks = Object.keys(THEMES); const k = ks[(ks.indexOf(SETTINGS.theme) + 1) % ks.length]; setTheme(k); toast('主题：' + THEMES[k].name); if (location.hash === '#settings') renderSettings(); };
+
+/* ========== 启动 ========== */
+(async () => {
+  try { await DB.open(); ITEMS = (await DB.all()) || []; applyBg(await DB.getKV('bg')); }
+  catch (e) { toast('本地存储不可用：' + e.message, 5000); }
+  setTheme(SETTINGS.theme);
+  renderLogo();
+  const setHdr = () => document.documentElement.style.setProperty('--hdr', $('header.top').offsetHeight + 'px');
+  setHdr(); addEventListener('resize', setHdr);
+  const tt = $('#toTop');
+  addEventListener('scroll', () => tt.classList.toggle('on', scrollY > 600), {passive: true});
+  tt.onclick = () => scrollTo({top: 0, behavior: 'smooth'});
+  // 等 KaTeX 加载完再渲染一次
+  window.addEventListener('load', () => math(main));
+  route();
+})();
+</script>
+</body>
+</html>
